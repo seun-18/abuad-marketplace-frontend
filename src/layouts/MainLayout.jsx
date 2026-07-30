@@ -7,7 +7,7 @@ const MainLayout = () => {
   const isHome = pathname === '/';
 
   return (
-    <div className={`flex min-h-screen flex-col ${isHome ? 'home-layout' : ''}`}>
+    <div className="flex min-h-screen flex-col home-layout market-dark">
       <Navbar />
       <main
         className={

@@ -43,72 +43,56 @@ const Login = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto py-12 px-4">
-      <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Login to Your Account</h1>
-        <p className="text-sm text-gray-500 mb-6">
-          Welcome back — enter your details to continue shopping or manage your store.
+    <div className="auth-page">
+      <div className="auth-card">
+        <p className="eyebrow" style={{ color: '#ffb703', marginBottom: '0.75rem' }}>
+          ABUAD Market Place
+        </p>
+        <h1>Welcome back</h1>
+        <p className="auth-subtitle">
+          Sign in to shop campus finds, manage your store, or continue where you left off.
         </p>
 
-        {notice && (
-          <div className="mb-5 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg text-sm">
-            {notice}
-          </div>
-        )}
-
-        {error && (
-          <div className="mb-5 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
+        {notice && <div className="auth-alert auth-alert-success">{notice}</div>}
+        {error && <div className="auth-alert auth-alert-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase text-gray-600 mb-1">
-              Email Address
-            </label>
+            <label htmlFor="email">Email address</label>
             <input
+              id="email"
               type="email"
               autoComplete="email"
               name="email"
               required
-              aria-label="Email address"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-gray-600 mb-1">
-              Password
-            </label>
+            <label htmlFor="password">Password</label>
             <input
+              id="password"
               type="password"
               autoComplete="current-password"
               name="password"
               required
-              aria-label="Password"
+              minLength={8}
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="••••••••"
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition disabled:bg-gray-400 shadow-md"
-          >
-            {submitting ? 'Signing in…' : 'Login'}
+          <button type="submit" disabled={submitting} className="auth-submit">
+            {submitting ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
 
-        <p className="text-sm text-gray-500 text-center mt-6">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-indigo-600 font-semibold hover:underline">
-            Create one
-          </Link>
+        <p className="auth-footer">
+          New here? <Link to="/register">Create an account</Link>
         </p>
       </div>
     </div>

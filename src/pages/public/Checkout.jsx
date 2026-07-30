@@ -7,7 +7,7 @@ import { useCart } from '../../context/CartContext';
 import { resolveImageUrl } from '../../utils/imageUrl';
 
 const Checkout = () => {
-  const { cart, getSubtotal } = useCart();
+  const { cart, getSubtotal, syncCartToServer, syncing } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const subtotal = getSubtotal();
@@ -115,7 +115,16 @@ const Checkout = () => {
 
     setSubmitting(true);
     try {
-      const response = await api.post('/checkout/initialize.php', formData);
+      // Server checkout reads DB cart — sync local bag first
+      await syncCartToServer();
+      const response = await api.post('/checkout/initialize.php', {
+        ...formData,
+        items: cart.map((item) => ({
+          product_id: item.product_id,
+          variant_id: item.variant_id || null,
+          quantity: item.quantity,
+        })),
+      });
       if (!response.data.success) {
         throw new Error(response.data.message || 'Checkout could not be started.');
       }
@@ -310,10 +319,10 @@ const Checkout = () => {
           <button
             type="submit"
             className="checkout-submit"
-            disabled={submitting || loadingLocations}
+            disabled={submitting || syncing || loadingLocations}
           >
             <ShieldCheck size={18} />
-            {submitting
+            {submitting || syncing
               ? 'Preparing secure payment…'
               : `Continue to payment · ₦${estimatedTotal.toLocaleString()}`}
           </button>

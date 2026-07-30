@@ -40,6 +40,28 @@ const CustomerChat = () => {
             };
             setMessages((prev) => {
               if (prev.some((m) => m.id === row.id)) return prev;
+              // Replace optimistic local bubble when the server/WS echo arrives
+              const localIdx = prev.findIndex(
+                (m) =>
+                  String(m.id).startsWith('local-') &&
+                  Number(m.sender_id) === Number(row.sender_id) &&
+                  (m.message === plain || m.message === (msg.data.message || ''))
+              );
+              if (localIdx >= 0) {
+                const copy = [...prev];
+                copy[localIdx] = row;
+                return copy;
+              }
+              // Also drop any recent local bubble from same sender within 15s
+              const withoutStaleLocal = prev.filter((m) => {
+                if (!String(m.id).startsWith('local-')) return true;
+                if (Number(m.sender_id) !== Number(row.sender_id)) return true;
+                const age = Date.now() - new Date(m.created_at).getTime();
+                return age > 15000;
+              });
+              if (withoutStaleLocal.length !== prev.length) {
+                return [...withoutStaleLocal, row];
+              }
               return [...prev, row];
             });
           })();

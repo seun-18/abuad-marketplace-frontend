@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import api from '../api/axios';
 
 const CartContext = createContext();
 
@@ -10,7 +11,6 @@ function cartStorageKey(userId) {
 function loadCart(userId) {
   try {
     let raw = localStorage.getItem(cartStorageKey(userId));
-    // One-time migration from the old shared cart key → guest cart
     if (!raw && !userId) {
       const legacy = localStorage.getItem('marketplace_cart');
       if (legacy) {
@@ -31,27 +31,86 @@ function saveCart(userId, cart) {
   localStorage.setItem(cartStorageKey(userId), JSON.stringify(cart));
 }
 
+function mergeCarts(primary, secondary) {
+  const map = new Map();
+  for (const item of [...secondary, ...primary]) {
+    const key = `${item.product_id}:${item.variant_id ?? 'base'}`;
+    const existing = map.get(key);
+    if (existing) {
+      map.set(key, {
+        ...existing,
+        ...item,
+        quantity: Math.max(Number(existing.quantity) || 0, Number(item.quantity) || 0),
+      });
+    } else {
+      map.set(key, { ...item });
+    }
+  }
+  return Array.from(map.values());
+}
+
 export const CartProvider = ({ children }) => {
   const { user } = useAuth();
   const userId = user?.id ?? null;
   const prevUserIdRef = useRef(userId);
-
   const [cart, setCart] = useState(() => loadCart(null));
+  const [syncing, setSyncing] = useState(false);
 
-  // When login/logout/switch account: swap cart for that user id
   useEffect(() => {
     const prev = prevUserIdRef.current;
-    if (prev !== userId) {
-      // Persist previous user's cart was already saved by the cart effect;
-      // load the new identity's cart
+    if (prev === userId) return;
+
+    if (userId && !prev) {
+      const guestCart = loadCart(null);
+      const userCart = loadCart(userId);
+      const merged = mergeCarts(userCart, guestCart);
+      setCart(merged);
+      saveCart(userId, merged);
+      if (guestCart.length) {
+        localStorage.removeItem(cartStorageKey(null));
+      }
+    } else {
       setCart(loadCart(userId));
-      prevUserIdRef.current = userId;
     }
+    prevUserIdRef.current = userId;
   }, [userId]);
 
-  // Persist current cart under the active identity
   useEffect(() => {
     saveCart(userId, cart);
+  }, [cart, userId]);
+
+  const syncCartToServer = useCallback(async () => {
+    if (!userId || cart.length === 0) return { ok: true, count: 0 };
+
+    setSyncing(true);
+    try {
+      try {
+        const existing = await api.get('/cart/index.php');
+        const items = existing.data?.data?.items || [];
+        await Promise.all(
+          items.map((item) =>
+            api.delete(`/cart/index.php?cart_item_id=${item.cart_item_id}`).catch(() => null)
+          )
+        );
+      } catch {
+        /* continue */
+      }
+
+      for (const item of cart) {
+        await api.post('/cart/index.php', {
+          product_id: item.product_id,
+          variant_id: item.variant_id || null,
+          quantity: item.quantity,
+          override: true,
+        });
+      }
+      return { ok: true, count: cart.length };
+    } catch (err) {
+      console.error('Cart sync failed:', err);
+      throw err;
+    } finally {
+      setSyncing(false);
+    }
   }, [cart, userId]);
 
   const addToCart = (product, quantity = 1, variant = null) => {
@@ -80,6 +139,16 @@ export const CartProvider = ({ children }) => {
         },
       ];
     });
+
+    if (user?.role === 'customer' && product?.id) {
+      api
+        .post('/cart/index.php', {
+          product_id: product.id,
+          variant_id: variant?.id || null,
+          quantity,
+        })
+        .catch(() => {});
+    }
   };
 
   const removeFromCart = (productId, variantId = null) => {
@@ -119,6 +188,8 @@ export const CartProvider = ({ children }) => {
         clearCart,
         getSubtotal,
         getItemCount,
+        syncCartToServer,
+        syncing,
       }}
     >
       {children}

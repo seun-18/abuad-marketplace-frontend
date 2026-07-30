@@ -63,179 +63,144 @@ const Register = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto py-12 px-4">
-      <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Create an Account</h1>
-        <p className="text-sm text-gray-500 mb-6">
-          Join the campus marketplace as a shopper or open your own store.
+    <div className="auth-page">
+      <div className="auth-card" style={{ maxWidth: '30rem' }}>
+        <p className="eyebrow" style={{ color: '#ffb703', marginBottom: '0.75rem' }}>
+          ABUAD Market Place
+        </p>
+        <h1>Create your account</h1>
+        <p className="auth-subtitle">
+          Join as a shopper or open a campus store. Vendors go live after a quick admin review.
         </p>
 
-        {error && (
-          <div className="mb-5 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
+        {error && <div className="auth-alert auth-alert-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Role Toggle */}
           <div>
-            <label className="block text-xs font-semibold uppercase text-gray-600 mb-2">
-              I want to
-            </label>
-            <div className="grid grid-cols-2 gap-3">
+            <label>I want to</label>
+            <div className="auth-role-grid">
               <button
                 type="button"
+                className={`auth-role-btn ${formData.role === 'customer' ? 'active' : ''}`}
                 onClick={() => setFormData({ ...formData, role: 'customer' })}
-                className={`py-2.5 rounded-lg text-sm font-semibold border transition ${
-                  formData.role === 'customer'
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
-                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                }`}
               >
-                Shop as a Customer
+                Shop as a customer
               </button>
               <button
                 type="button"
+                className={`auth-role-btn ${formData.role === 'vendor' ? 'active' : ''}`}
                 onClick={() => setFormData({ ...formData, role: 'vendor' })}
-                className={`py-2.5 rounded-lg text-sm font-semibold border transition ${
-                  formData.role === 'vendor'
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
-                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                }`}
               >
-                Sell as a Vendor
+                Sell as a vendor
               </button>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase text-gray-600 mb-1">
-                First Name
-              </label>
+              <label htmlFor="first_name">First name</label>
               <input
+                id="first_name"
                 type="text"
                 name="first_name"
                 required
                 minLength={2}
                 value={formData.first_name}
                 onChange={handleChange}
-                className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase text-gray-600 mb-1">
-                Last Name
-              </label>
+              <label htmlFor="last_name">Last name</label>
               <input
+                id="last_name"
                 type="text"
                 name="last_name"
                 required
                 minLength={2}
                 value={formData.last_name}
                 onChange={handleChange}
-                className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-gray-600 mb-1">
-              Email Address
-            </label>
+            <label htmlFor="reg_email">Email address</label>
             <input
+              id="reg_email"
               type="email"
               name="email"
               required
-              aria-label="Email address"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-gray-600 mb-1">
-              Phone Number
-            </label>
+            <label htmlFor="phone">Phone number</label>
             <input
+              id="phone"
               type="tel"
               name="phone"
               required
               minLength={10}
-              aria-label="Phone number"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="080…"
             />
           </div>
 
           {formData.role === 'vendor' && (
             <div>
-              <label className="block text-xs font-semibold uppercase text-gray-600 mb-1">
-                Shop Name
-              </label>
+              <label htmlFor="shop_name">Shop name</label>
               <input
+                id="shop_name"
                 type="text"
                 name="shop_name"
-                aria-label="Shop name"
                 value={formData.shop_name}
                 onChange={handleChange}
-                className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder={`${formData.first_name || 'Your'}'s Shop`}
               />
-              <p className="text-xs text-gray-400 mt-1">
-                Leave blank to use "{formData.first_name || 'Your name'}'s Shop" — new stores need
-                admin approval before going live.
+              <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.35rem' }}>
+                Optional — new stores need admin approval before going live.
               </p>
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase text-gray-600 mb-1">
-                Password
-              </label>
+              <label htmlFor="reg_password">Password</label>
               <input
+                id="reg_password"
                 type="password"
                 name="password"
                 required
                 minLength={8}
-                aria-label="Password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase text-gray-600 mb-1">
-                Confirm
-              </label>
+              <label htmlFor="confirm_password">Confirm</label>
               <input
+                id="confirm_password"
                 type="password"
                 name="confirm_password"
                 required
                 minLength={8}
                 value={formData.confirm_password}
                 onChange={handleChange}
-                className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition disabled:bg-gray-400 shadow-md"
-          >
-            {submitting ? 'Creating account…' : 'Create Account'}
+          <button type="submit" disabled={submitting} className="auth-submit">
+            {submitting ? 'Creating account…' : 'Create account'}
           </button>
         </form>
 
-        <p className="text-sm text-gray-500 text-center mt-6">
-          Already have an account?{' '}
-          <Link to="/login" className="text-indigo-600 font-semibold hover:underline">
-            Log in
-          </Link>
+        <p className="auth-footer">
+          Already have an account? <Link to="/login">Sign in</Link>
         </p>
       </div>
     </div>

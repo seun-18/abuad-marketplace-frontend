@@ -34,7 +34,20 @@ const VendorMessages = () => {
               message: plain,
               message_type: msg.data.message_type || 'text',
             };
-            setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, row]));
+            setMessages((prev) => {
+              if (prev.some((m) => m.id === row.id)) return prev;
+              const localIdx = prev.findIndex(
+                (m) =>
+                  String(m.id).startsWith('local-') &&
+                  Number(m.sender_id) === Number(row.sender_id)
+              );
+              if (localIdx >= 0) {
+                const copy = [...prev];
+                copy[localIdx] = row;
+                return copy;
+              }
+              return [...prev, row];
+            });
           })();
         }
         const bump = (list) =>
