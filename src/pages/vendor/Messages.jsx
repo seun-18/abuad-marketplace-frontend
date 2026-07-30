@@ -6,6 +6,7 @@ import { useChatSocket } from '../../hooks/useChatSocket';
 import { useE2EChat } from '../../hooks/useE2EChat';
 import MessageBubble from '../../components/chat/MessageBubble';
 import ChatComposer from '../../components/chat/ChatComposer';
+import ChatShell from '../../components/chat/ChatShell';
 
 const VendorMessages = () => {
   const { user } = useAuth();
@@ -235,46 +236,11 @@ const VendorMessages = () => {
     );
   };
 
+  const activeTitle = activeConversation ? titleFor(activeConversation) : '';
+
   return (
-    <div className="h-full flex flex-col space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
-          <p className="text-sm text-gray-500">
-            Chat with customers and the platform administrator.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <span
-            className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${e2eReady ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-gray-50 text-gray-500 border-gray-200'}`}
-          >
-            {e2eReady ? 'E2E on' : 'E2E…'}
-          </span>
-          <span
-            className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${connected ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}
-          >
-            {connected ? 'Live' : 'Connecting…'}
-          </span>
-        </div>
-        {tab === 'admin' && (
-          <button
-            type="button"
-            onClick={startAdminChat}
-            disabled={loading}
-            className="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-          >
-            Chat with Admin
-          </button>
-        )}
-      </div>
-
-      {error && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg text-sm">
-          {error}
-        </div>
-      )}
-
-      <div className="flex gap-2">
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={() => {
@@ -282,11 +248,7 @@ const VendorMessages = () => {
             setActiveConversation(null);
             setMessages([]);
           }}
-          className={`px-4 py-2 text-sm font-semibold rounded-lg ${
-            tab === 'customers'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-white border border-gray-200 text-gray-700'
-          }`}
+          className={`chat-tab-btn ${tab === 'customers' ? 'active' : ''}`}
         >
           Customers ({customerConversations.length})
         </button>
@@ -297,80 +259,119 @@ const VendorMessages = () => {
             setActiveConversation(null);
             setMessages([]);
           }}
-          className={`px-4 py-2 text-sm font-semibold rounded-lg ${
-            tab === 'admin'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-white border border-gray-200 text-gray-700'
-          }`}
+          className={`chat-tab-btn ${tab === 'admin' ? 'active' : ''}`}
         >
           Admin Support ({adminConversations.length})
         </button>
+        {tab === 'admin' && (
+          <button
+            type="button"
+            onClick={startAdminChat}
+            disabled={loading}
+            className="chat-start-btn chat-tab-start"
+          >
+            Chat with Admin
+          </button>
+        )}
       </div>
 
-      <div className="flex flex-1 min-h-[60vh] bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
-        <div className="w-1/3 bg-white border-r border-gray-200 overflow-y-auto">
-          {list.length === 0 ? (
-            <p className="p-4 text-center text-gray-500 text-sm">
+      <ChatShell
+        title="Messages"
+        subtitle="Chat with customers and the platform administrator."
+        kicker="Seller inbox"
+        hasActive={Boolean(activeConversation)}
+        onBack={() => {
+          setActiveConversation(null);
+          setMessages([]);
+        }}
+        activeTitle={activeTitle}
+        activeSubtitle={
+          activeConversation?.type === 'vendor_admin'
+            ? 'Platform administrator'
+            : 'Customer · encrypted chat'
+        }
+        activeAvatarLetter={activeTitle}
+        alert={error || lastError || e2eError || null}
+        statusPills={
+          <>
+            <span className={`chat-pill ${e2eReady ? 'chat-pill-on' : ''}`}>
+              {e2eReady ? 'E2E on' : 'E2E…'}
+            </span>
+            <span className={`chat-pill ${connected ? 'chat-pill-live' : 'chat-pill-wait'}`}>
+              {connected ? 'Live' : 'Connecting…'}
+            </span>
+          </>
+        }
+        listHeader={
+          <div className="customer-chat-sidebar-head luxury-chat-sidebar-head">
+            <h2>{tab === 'customers' ? 'Customers' : 'Admin'}</h2>
+          </div>
+        }
+        listContent={
+          list.length === 0 ? (
+            <p className="chat-empty-hint">
               {tab === 'customers'
                 ? 'No customer messages yet. New chats appear when a customer messages you.'
-                : 'No admin chat yet. Click “Chat with Admin” to start one.'}
+                : 'No admin chat yet. Use “Chat with Admin” to start one.'}
             </p>
           ) : (
-            <div className="p-2 space-y-2">
-              {list.map((conv) => (
-                <div
+            list.map((conv) => {
+              const title = titleFor(conv);
+              return (
+                <button
+                  type="button"
                   key={conv.id}
                   onClick={() => selectConversation(conv)}
-                  className={`p-3 rounded-lg cursor-pointer ${
-                    activeConversation?.id === conv.id
-                      ? 'bg-indigo-100 border-l-4 border-indigo-600'
-                      : 'bg-gray-100 hover:bg-gray-200'
+                  className={`customer-chat-conversation luxury-chat-item ${
+                    activeConversation?.id === conv.id ? 'active' : ''
                   }`}
                 >
-                  <p className="font-medium text-sm text-gray-900">{titleFor(conv)}</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {conv.updated_at ? new Date(conv.updated_at).toLocaleString() : ''}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="flex-1 flex flex-col bg-white">
-          {activeConversation ? (
-            <>
-              <div className="p-4 border-b border-gray-200">
-                <h3 className="font-semibold text-gray-900">{titleFor(activeConversation)}</h3>
-                <p className="text-sm text-gray-500">
-                  {activeConversation.type === 'vendor_admin'
-                    ? 'Platform administrator'
-                    : 'Customer'}
-                </p>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.length === 0 ? (
-                  <p className="text-center text-gray-500 text-sm py-10">No messages yet.</p>
-                ) : (
-                  messages.map((msg) => (
-                    <MessageBubble key={msg.id} msg={msg} isMine={msg.sender_id === user.id} />
-                  ))
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-              <ChatComposer
-                conversationId={activeConversation.id}
-                onSendText={handleSendText}
-                onSendMediaMessage={handleSendMedia}
-              />
-            </>
+                  <span className="chat-avatar" aria-hidden="true">
+                    {title.charAt(0).toUpperCase()}
+                  </span>
+                  <span className="chat-item-copy">
+                    <span className="chat-item-name">{title}</span>
+                    <span className="chat-item-time">
+                      {conv.updated_at ? new Date(conv.updated_at).toLocaleString() : ''}
+                    </span>
+                  </span>
+                </button>
+              );
+            })
+          )
+        }
+        messagesContent={
+          messages.length === 0 ? (
+            <p className="chat-empty-hint">No messages yet.</p>
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-              Select a conversation
-            </div>
-          )}
-        </div>
-      </div>
+            <>
+              {messages.map((msg) => (
+                <MessageBubble
+                  key={msg.id}
+                  msg={msg}
+                  isMine={Number(msg.sender_id) === Number(user.id)}
+                />
+              ))}
+              <div ref={messagesEndRef} />
+            </>
+          )
+        }
+        composer={
+          activeConversation ? (
+            <ChatComposer
+              conversationId={activeConversation.id}
+              onSendText={handleSendText}
+              onSendMediaMessage={handleSendMedia}
+            />
+          ) : null
+        }
+        emptyThread={
+          <>
+            <p>Select a conversation</p>
+            <span>Pick a customer or open admin support.</span>
+          </>
+        }
+      />
     </div>
   );
 };

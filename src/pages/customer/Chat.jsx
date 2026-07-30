@@ -6,6 +6,7 @@ import { useChatSocket } from '../../hooks/useChatSocket';
 import { useE2EChat } from '../../hooks/useE2EChat';
 import MessageBubble from '../../components/chat/MessageBubble';
 import ChatComposer from '../../components/chat/ChatComposer';
+import ChatShell from '../../components/chat/ChatShell';
 
 const CustomerChat = () => {
   const { user } = useAuth();
@@ -300,139 +301,127 @@ const CustomerChat = () => {
     }
   };
 
+  const activeTitle =
+    activeConversation?.shop_name ||
+    [activeConversation?.vendor_first_name, activeConversation?.vendor_last_name]
+      .filter(Boolean)
+      .join(' ') ||
+    'Vendor chat';
+
+  const closeThread = () => setActiveConversation(null);
+
+  const openThread = (conv) => {
+    setActiveConversation(conv);
+    if (conv?.id) fetchMessages(conv.id);
+  };
+
   return (
-    <div className="customer-chat-page max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-4 gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
-          <p className="text-sm text-gray-500">
-            Chat with vendors using text, photos, and voice notes.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span
-            className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
-              e2eReady
-                ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                : 'bg-gray-50 text-gray-500 border-gray-200'
-            }`}
-          >
+    <ChatShell
+      title="Messages"
+      subtitle="Text, photos, and voice notes with ABUAD vendors."
+      kicker="Secure messaging"
+      hasActive={Boolean(activeConversation)}
+      onBack={closeThread}
+      activeTitle={activeTitle}
+      activeSubtitle="Vendor · encrypted chat"
+      activeAvatarLetter={activeTitle}
+      alert={error || lastError || e2eError || null}
+      statusPills={
+        <>
+          <span className={`chat-pill ${e2eReady ? 'chat-pill-on' : ''}`}>
             {e2eReady ? 'E2E on' : 'E2E…'}
           </span>
-          <span
-            className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
-              connected
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                : 'bg-amber-50 text-amber-700 border-amber-200'
-            }`}
-          >
+          <span className={`chat-pill ${connected ? 'chat-pill-live' : 'chat-pill-wait'}`}>
             {connected ? 'Live' : 'Connecting…'}
           </span>
+        </>
+      }
+      listHeader={
+        <div className="customer-chat-sidebar-head luxury-chat-sidebar-head">
+          <h2>Chats</h2>
+          <form onSubmit={startNewChat} className="space-y-2">
+            <select
+              value={vendorId}
+              onChange={(e) => setVendorId(e.target.value)}
+              aria-label="Select a vendor to message"
+            >
+              <option value="">Message a vendor…</option>
+              {vendors.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.shop_name}
+                </option>
+              ))}
+            </select>
+            <button type="submit" disabled={loading || !vendorId} className="chat-start-btn">
+              {loading ? 'Starting…' : 'Start chat'}
+            </button>
+          </form>
         </div>
-      </div>
-
-      {(error || lastError || e2eError) && (
-        <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg text-sm">
-          {error || lastError || e2eError}
-        </div>
-      )}
-
-      <div className="customer-chat-shell flex h-[72vh] rounded-2xl overflow-hidden shadow-sm">
-        {/* Sidebar */}
-        <div className="customer-chat-sidebar w-full sm:w-1/3 flex flex-col">
-          <div className="customer-chat-sidebar-head p-4 space-y-3 text-white">
-            <h2 className="text-lg font-semibold">Chats</h2>
-            <form onSubmit={startNewChat} className="space-y-2">
-              <select
-                value={vendorId}
-                onChange={(e) => setVendorId(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg text-sm text-gray-900 focus:outline-none"
-              >
-                <option value="">Message a vendor…</option>
-                {vendors.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.shop_name}
-                  </option>
-                ))}
-              </select>
+      }
+      listContent={
+        conversations.length === 0 ? (
+          <p className="chat-empty-hint">No conversations yet. Start one above.</p>
+        ) : (
+          conversations.map((conv) => {
+            const title =
+              conv.shop_name ||
+              [conv.vendor_first_name, conv.vendor_last_name].filter(Boolean).join(' ') ||
+              'Approved ABUAD shop';
+            return (
               <button
-                type="submit"
-                disabled={loading || !vendorId}
-                className="w-full px-3 py-2 bg-white text-indigo-700 font-semibold rounded-lg text-sm disabled:opacity-50"
+                type="button"
+                key={conv.id}
+                onClick={() => openThread(conv)}
+                className={`customer-chat-conversation luxury-chat-item ${
+                  activeConversation?.id === conv.id ? 'active' : ''
+                }`}
               >
-                Start chat
-              </button>
-            </form>
-          </div>
-          <div className="flex-1 overflow-y-auto p-2 space-y-1">
-            {conversations.length === 0 ? (
-              <p className="p-6 text-center text-gray-400 text-sm">No conversations yet</p>
-            ) : (
-              conversations.map((conv) => (
-                <button
-                  type="button"
-                  key={conv.id}
-                  onClick={() => {
-                    setActiveConversation(conv);
-                    fetchMessages(conv.id);
-                  }}
-                  className={`customer-chat-conversation w-full text-left p-3 rounded-xl transition ${
-                    activeConversation?.id === conv.id ? 'active' : ''
-                  }`}
-                >
-                  <p className="font-semibold text-sm text-gray-900 truncate">
-                    {conv.shop_name ||
-                      [conv.vendor_first_name, conv.vendor_last_name].filter(Boolean).join(' ') ||
-                      'Approved ABUAD shop'}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                <span className="chat-avatar" aria-hidden="true">
+                  {title.charAt(0).toUpperCase()}
+                </span>
+                <span className="chat-item-copy">
+                  <span className="chat-item-name">{title}</span>
+                  <span className="chat-item-time">
                     {conv.updated_at ? new Date(conv.updated_at).toLocaleString() : ''}
-                  </p>
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Thread */}
-        <div className="customer-chat-thread hidden sm:flex flex-1 flex-col">
-          {activeConversation ? (
-            <>
-              <div className="customer-chat-thread-head px-4 py-3 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
-                  {(activeConversation.shop_name || 'V').charAt(0)}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-sm">
-                    {activeConversation.shop_name ||
-                      [activeConversation.vendor_first_name, activeConversation.vendor_last_name]
-                        .filter(Boolean)
-                        .join(' ') ||
-                      'Approved ABUAD shop'}
-                  </h3>
-                  <p className="text-xs text-gray-400">Vendor · secure chat</p>
-                </div>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {messages.map((msg) => (
-                  <MessageBubble key={msg.id} msg={msg} isMine={msg.sender_id === user.id} />
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-              <ChatComposer
-                conversationId={activeConversation.id}
-                onSendText={handleSendText}
-                onSendMediaMessage={handleSendMedia}
+                  </span>
+                </span>
+              </button>
+            );
+          })
+        )
+      }
+      messagesContent={
+        messages.length === 0 ? (
+          <p className="chat-empty-hint">Say hello — send the first message.</p>
+        ) : (
+          <>
+            {messages.map((msg) => (
+              <MessageBubble
+                key={msg.id}
+                msg={msg}
+                isMine={Number(msg.sender_id) === Number(user.id)}
               />
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-400 text-sm p-8 text-center">
-              Select a conversation or start a new chat with a vendor.
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </>
+        )
+      }
+      composer={
+        activeConversation ? (
+          <ChatComposer
+            conversationId={activeConversation.id}
+            onSendText={handleSendText}
+            onSendMediaMessage={handleSendMedia}
+          />
+        ) : null
+      }
+      emptyThread={
+        <>
+          <p>Select a conversation</p>
+          <span>Or start a new chat with a vendor from the list.</span>
+        </>
+      }
+    />
   );
 };
 

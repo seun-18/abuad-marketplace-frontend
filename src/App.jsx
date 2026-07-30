@@ -16,6 +16,7 @@ import Checkout from './pages/public/Checkout';
 import CheckoutVerify from './pages/public/CheckoutVerify';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import VerifyEmail from './pages/auth/VerifyEmail';
 import Wishlist from './pages/customer/Wishlist';
 import CustomerOrders from './pages/customer/Orders';
 import Following from './pages/customer/Following';
@@ -52,6 +53,7 @@ function App() {
           <Route path="/product/:slug" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/register" element={<Register />} />
 
           {/* Customer Only */}
