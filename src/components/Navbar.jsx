@@ -1,4 +1,5 @@
 import { Heart, Menu, Search, ShoppingBag, UserRound, X } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -108,6 +109,7 @@ const Navbar = () => {
         </div>
 
         <div className="nav-actions">
+          <ThemeToggle className="nav-theme-toggle" />
           <form onSubmit={handleSearch} className="nav-search" role="search">
             <Search size={16} aria-hidden="true" />
             <input
