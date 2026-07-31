@@ -21,7 +21,7 @@ const VendorMessages = () => {
   const messagesEndRef = useRef(null);
   const activeIdRef = useRef(null);
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  const { e2eReady, encryptOutgoing, decryptIncoming, decryptHistory } = useE2EChat(user);
+  const { e2eReady, e2eError, encryptOutgoing, decryptIncoming, decryptHistory } = useE2EChat(user);
 
   const handleSocketMessage = useCallback(
     (msg) => {
@@ -68,6 +68,7 @@ const VendorMessages = () => {
 
   const {
     connected,
+    lastError,
     joinConversation,
     sendMessage: wsSend,
   } = useChatSocket({
