@@ -6207,6 +6207,215 @@ html[data-theme='light'] .auth-field-hint {
   color: rgba(29, 29, 31, 0.45);
 }
 
-.auth-forgot-row { display:flex; justify-content:flex-end; margin-top:-0.35rem; }
-.auth-forgot-link { font-size:0.8rem; font-weight:600; color:#ffb703; text-decoration:none; }
-.auth-forgot-link:hover { text-decoration:underline; }
+
+/* ========== THEME FIX: light mode overrides force-dark ========== */
+
+html[data-theme='light'] {
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+/* Kill forced black backgrounds in light mode */
+html[data-theme='light'] body,
+html[data-theme='light'] .home-layout,
+html[data-theme='light'] .market-dark,
+html[data-theme='light'] .home-shell {
+  background: #f4f4f6 !important;
+  color: #1d1d1f !important;
+}
+
+html[data-theme='light'] .dashboard-shell,
+html[data-theme='light'] .dashboard-main-pane,
+html[data-theme='light'] .dashboard-main,
+html[data-theme='light'] .premium-dashboard-page {
+  background: #f4f4f6 !important;
+  color: #1d1d1f !important;
+}
+
+html[data-theme='light'] .dashboard-shell .bg-white,
+html[data-theme='light'] .dashboard-shell .bg-gray-50,
+html[data-theme='light'] .dashboard-shell .bg-gray-100,
+html[data-theme='light'] .dashboard-shell .bg-gray-200,
+html[data-theme='light'] .market-dark .bg-white,
+html[data-theme='light'] .market-dark .bg-gray-50,
+html[data-theme='light'] .market-dark .bg-gray-100 {
+  background-color: #ffffff !important;
+  color: #1d1d1f !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-theme='light'] .dashboard-shell .text-gray-900,
+html[data-theme='light'] .dashboard-shell .text-gray-800,
+html[data-theme='light'] .dashboard-shell .text-gray-700,
+html[data-theme='light'] .dashboard-shell .text-gray-600,
+html[data-theme='light'] .market-dark .text-gray-900,
+html[data-theme='light'] .market-dark .text-gray-800,
+html[data-theme='light'] .premium-dashboard-page h1,
+html[data-theme='light'] .premium-dashboard-page h2 {
+  color: #0a0a0a !important;
+}
+
+html[data-theme='light'] .dashboard-shell .text-gray-500,
+html[data-theme='light'] .dashboard-shell .text-gray-400,
+html[data-theme='light'] .dashboard-shell .text-gray-300,
+html[data-theme='light'] .market-dark .text-gray-500,
+html[data-theme='light'] .market-dark .text-gray-400 {
+  color: rgba(29, 29, 31, 0.55) !important;
+}
+
+html[data-theme='light'] .dashboard-shell .border-gray-100,
+html[data-theme='light'] .dashboard-shell .border-gray-200,
+html[data-theme='light'] .dashboard-shell .border-gray-300,
+html[data-theme='light'] .market-dark .border-gray-100,
+html[data-theme='light'] .market-dark .border-gray-200 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-theme='light'] .dashboard-shell input,
+html[data-theme='light'] .dashboard-shell select,
+html[data-theme='light'] .dashboard-shell textarea,
+html[data-theme='light'] .market-dark input,
+html[data-theme='light'] .market-dark select,
+html[data-theme='light'] .market-dark textarea {
+  background-color: #ffffff !important;
+  color: #0a0a0a !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+html[data-theme='light'] .dashboard-shell table thead,
+html[data-theme='light'] .dashboard-shell th {
+  background-color: #f0f0f3 !important;
+  color: rgba(29, 29, 31, 0.55) !important;
+}
+
+html[data-theme='light'] .dashboard-panel,
+html[data-theme='light'] .dashboard-stat-card {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #1d1d1f !important;
+}
+
+html[data-theme='light'] .dashboard-sidebar {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-theme='light'] .dashboard-sidebar-brand,
+html[data-theme='light'] .dashboard-sidebar-link-active {
+  color: #0a0a0a;
+}
+
+html[data-theme='light'] .dashboard-sidebar-link {
+  color: rgba(29, 29, 31, 0.55);
+}
+
+html[data-theme='light'] .dashboard-header {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+html[data-theme='light'] .dashboard-header-name {
+  color: rgba(29, 29, 31, 0.85) !important;
+}
+
+html[data-theme='light'] .dashboard-header-button,
+html[data-theme='light'] .theme-toggle {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  background: rgba(0, 0, 0, 0.04) !important;
+  color: #1d1d1f !important;
+}
+
+html[data-theme='light'] .theme-toggle:hover {
+  border-color: rgba(201, 146, 0, 0.4) !important;
+  background: rgba(255, 183, 3, 0.12) !important;
+  color: #a67c00 !important;
+}
+
+html[data-theme='light'] .dashboard-alert {
+  background: rgba(244, 63, 94, 0.08) !important;
+  border-color: rgba(244, 63, 94, 0.2) !important;
+  color: #be123c !important;
+}
+
+html[data-theme='light'] .dashboard-empty {
+  color: rgba(29, 29, 31, 0.45) !important;
+}
+
+html[data-theme='light'] .chat-tab-btn {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  background: #fff !important;
+  color: rgba(29, 29, 31, 0.65) !important;
+}
+
+html[data-theme='light'] .chat-tab-btn.active {
+  border-color: rgba(201, 146, 0, 0.35) !important;
+  background: rgba(255, 183, 3, 0.15) !important;
+  color: #a67c00 !important;
+}
+
+html[data-theme='light'] .auth-page {
+  background: #f4f4f6 !important;
+}
+
+html[data-theme='light'] .auth-card {
+  background: #fff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #1d1d1f !important;
+}
+
+html[data-theme='light'] .auth-card h1 {
+  color: #0a0a0a !important;
+}
+
+html[data-theme='light'] .auth-subtitle,
+html[data-theme='light'] .auth-footer {
+  color: rgba(29, 29, 31, 0.55) !important;
+}
+
+html[data-theme='light'] .auth-card input,
+html[data-theme='light'] .auth-card select,
+html[data-theme='light'] .auth-card textarea {
+  background: #f7f7f9 !important;
+  color: #0a0a0a !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+html[data-theme='light'] .premium-nav-scrolled {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+html[data-theme='light'] .premium-footer,
+html[data-theme='light'] footer.premium-footer,
+html[data-theme='light'] .site-footer {
+  background: #ececee !important;
+  color: #1d1d1f !important;
+}
+
+/* Smooth theme transition on shell surfaces */
+html,
+body,
+.dashboard-shell,
+.home-layout,
+.auth-page,
+.premium-nav {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Theme toggle always visible */
+.theme-toggle {
+  display: grid !important;
+  width: 2.35rem;
+  height: 2.35rem;
+  place-items: center;
+  border-radius: 999px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.nav-theme-toggle {
+  margin-right: 0.15rem;
+}

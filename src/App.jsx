@@ -19,6 +19,7 @@ import Register from './pages/auth/Register';
 import VerifyEmail from './pages/auth/VerifyEmail';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
+import VerifyPhone from './pages/auth/VerifyPhone';
 import Wishlist from './pages/customer/Wishlist';
 import CustomerOrders from './pages/customer/Orders';
 import Following from './pages/customer/Following';
@@ -39,6 +40,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminVendors from './pages/admin/Vendors';
 import AdminCategories from './pages/admin/Categories';
 import AdminVendorChats from './pages/admin/VendorChats';
+import AdminPayouts from './pages/admin/Payouts';
 
 // Customer Chat
 import CustomerChat from './pages/customer/Chat';
@@ -58,6 +60,7 @@ function App() {
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-phone" element={<VerifyPhone />} />
           <Route path="/register" element={<Register />} />
 
           {/* Customer Only */}
@@ -93,6 +96,7 @@ function App() {
             <Route path="/admin/vendors" element={<AdminVendors />} />
             <Route path="/admin/categories" element={<AdminCategories />} />
             <Route path="/admin/vendor-chats" element={<AdminVendorChats />} />
+            <Route path="/admin/payouts" element={<AdminPayouts />} />
           </Route>
         </Route>
 

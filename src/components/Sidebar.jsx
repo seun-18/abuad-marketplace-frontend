@@ -35,6 +35,7 @@ const navigation = {
       ['/admin/vendors', 'Vendors', Users],
       ['/admin/categories', 'Categories', Boxes],
       ['/admin/vendor-chats', 'Vendor support', LifeBuoy],
+      ['/admin/payouts', 'Payouts', CircleDollarSign],
     ],
   },
   customer: {

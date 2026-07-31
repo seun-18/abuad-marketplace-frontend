@@ -11,10 +11,13 @@ const VendorChats = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [tab, setTab] = useState('chats'); // chats | vendors
+  const [startingId, setStartingId] = useState(null);
   const messagesEndRef = useRef(null);
   const activeIdRef = useRef(null);
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -60,127 +63,214 @@ const VendorChats = () => {
       const list = Array.isArray(response.data.data) ? response.data.data : [];
       const adminChats = list.filter((conversation) => conversation.type === 'vendor_admin');
       setConversations(adminChats);
-      if (adminChats.length > 0 && !activeIdRef.current) {
-        setActiveConversation(adminChats[0]);
-        await fetchMessages(adminChats[0].id);
-      }
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Could not load vendor support chats.');
+      setError(requestError.response?.data?.message || 'Could not load conversations.');
     } finally {
       setLoading(false);
     }
-  }, [fetchMessages]);
+  }, []);
+
+  const fetchVendors = useCallback(async () => {
+    try {
+      const res = await api.get('/admin/vendors.php');
+      const list = res.data?.data || [];
+      setVendors(Array.isArray(list) ? list : []);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not load vendors.');
+    }
+  }, []);
 
   useEffect(() => {
-    if (!user || user.role !== 'super_admin') {
-      navigate('/login');
+    if (!user) return;
+    if (user.role !== 'super_admin') {
+      navigate('/unauthorized', { replace: true });
       return;
     }
     fetchConversations();
-  }, [fetchConversations, navigate, user]);
+    fetchVendors();
+  }, [user, navigate, fetchConversations, fetchVendors]);
 
   useEffect(() => {
-    activeIdRef.current = activeConversation?.id ?? null;
-    if (activeConversation?.id) joinConversation(activeConversation.id);
-  }, [activeConversation, joinConversation]);
+    activeIdRef.current = activeConversation?.id || null;
+    if (activeConversation?.id) {
+      joinConversation?.(activeConversation.id);
+      fetchMessages(activeConversation.id);
+    } else {
+      setMessages([]);
+    }
+  }, [activeConversation, fetchMessages, joinConversation]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const deliverMessage = async (payload) => {
-    if (!activeConversation?.id) return;
+  const selectConversation = (conversation) => {
+    setActiveConversation(conversation);
+    setTab('chats');
+  };
+
+  const startChatWithVendor = async (vendor) => {
+    const vendorId = vendor.vendor_id || vendor.id;
+    setStartingId(vendorId);
+    setError('');
     try {
-      const response = await api.post('/chat/send_message.php', {
-        conversation_id: activeConversation.id,
-        ...payload,
+      const res = await api.post('/chat/start.php', {
+        type: 'vendor_admin',
+        vendor_id: vendorId,
       });
-      appendMessage(response.data.data?.message);
-    } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Could not send this message.');
-      throw requestError;
+      const id = res.data?.data?.conversation_id || res.data?.data?.id;
+      await fetchConversations();
+      if (id) {
+        const title =
+          vendor.shop_name ||
+          [vendor.first_name, vendor.last_name].filter(Boolean).join(' ') ||
+          `Vendor #${vendorId}`;
+        setActiveConversation({
+          id,
+          type: 'vendor_admin',
+          vendor_id: vendorId,
+          shop_name: title,
+        });
+        setTab('chats');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not start chat with vendor.');
+    } finally {
+      setStartingId(null);
     }
   };
 
+  const deliverMessage = async (payload) => {
+    if (!activeConversation?.id) return;
+    try {
+      const res = await api.post('/chat/send_message.php', {
+        conversation_id: activeConversation.id,
+        ...payload,
+      });
+      if (res.data?.data) appendMessage(res.data.data);
+      else fetchMessages(activeConversation.id);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to send message.');
+    }
+  };
+
+  const titleFor = (conv) =>
+    conv.shop_name ||
+    [conv.vendor_first_name, conv.vendor_last_name].filter(Boolean).join(' ') ||
+    `Vendor #${conv.vendor_id || conv.id}`;
+
   return (
-    <div className="premium-dashboard-page">
-      <div className="dashboard-title-row">
+    <div className="premium-dashboard-page space-y-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="dashboard-kicker">Vendor support</p>
-          <h1>Media-ready support conversations.</h1>
-          <p>Receive vendor text, images, and voice notes in one secure workspace.</p>
+          <p className="dashboard-kicker">Support</p>
+          <h1>Vendor messages</h1>
+          <p className="text-sm opacity-60">
+            Message any registered vendor — you do not need to wait for them to write first.
+          </p>
         </div>
-        <div className="dashboard-verification">
-          <span className={connected ? 'status-live' : ''} />
-          {connected ? 'Live connection' : 'Syncing'}
+        <div className="flex items-center gap-2">
+          <span className={`chat-pill ${connected ? 'chat-pill-live' : 'chat-pill-wait'}`}>
+            {connected ? 'Live' : 'Connecting…'}
+          </span>
+          <button type="button" className="dashboard-header-button" onClick={() => { fetchConversations(); fetchVendors(); }}>
+            <RefreshCw size={16} />
+          </button>
         </div>
       </div>
 
-      {error && <div className="dashboard-alert dashboard-alert-error">{error}</div>}
+      {error && <div className="dashboard-alert">{error}</div>}
 
-      <div className="support-chat-shell">
-        <aside className="support-chat-list">
-          <div className="support-chat-list-heading">
-            <div>
-              <MessageCircleMore size={18} />
-              <span>Vendor conversations</span>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className={`chat-tab-btn ${tab === 'chats' ? 'active' : ''}`} onClick={() => setTab('chats')}>
+          Open chats ({conversations.length})
+        </button>
+        <button type="button" className={`chat-tab-btn ${tab === 'vendors' ? 'active' : ''}`} onClick={() => setTab('vendors')}>
+          All vendors ({vendors.length})
+        </button>
+      </div>
+
+      <div className="customer-chat-shell luxury-chat-shell" style={{ minHeight: '28rem' }}>
+        <aside className="customer-chat-sidebar luxury-chat-sidebar" style={{ width: 'min(40%, 22rem)' }}>
+          {tab === 'vendors' ? (
+            <div className="luxury-chat-list">
+              {vendors.length === 0 ? (
+                <p className="chat-empty-hint">No vendors registered yet.</p>
+              ) : (
+                vendors.map((v) => {
+                  const name =
+                    v.shop_name ||
+                    [v.first_name, v.last_name].filter(Boolean).join(' ') ||
+                    `Vendor #${v.vendor_id}`;
+                  return (
+                    <div key={v.vendor_id} className="luxury-chat-item" style={{ cursor: 'default' }}>
+                      <span className="chat-avatar">{name.charAt(0).toUpperCase()}</span>
+                      <span className="chat-item-copy min-w-0 flex-1">
+                        <span className="chat-item-name">{name}</span>
+                        <span className="chat-item-time">
+                          {[v.first_name, v.last_name].filter(Boolean).join(' ')} · {v.status}
+                          {v.email ? ` · ${v.email}` : ''}
+                        </span>
+                      </span>
+                      <button
+                        type="button"
+                        className="chat-start-btn chat-tab-start"
+                        style={{ width: 'auto', padding: '0.4rem 0.65rem', fontSize: '0.75rem' }}
+                        disabled={startingId === v.vendor_id}
+                        onClick={() => startChatWithVendor(v)}
+                      >
+                        {startingId === v.vendor_id ? '…' : 'Message'}
+                      </button>
+                    </div>
+                  );
+                })
+              )}
             </div>
-            <button type="button" onClick={fetchConversations} aria-label="Refresh conversations">
-              <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
-            </button>
-          </div>
-
-          <div className="support-chat-conversations">
-            {conversations.length === 0 ? (
-              <p>No vendor chats yet.</p>
-            ) : (
-              conversations.map((conversation) => (
-                <button
-                  type="button"
-                  key={conversation.id}
-                  onClick={() => {
-                    setActiveConversation(conversation);
-                    fetchMessages(conversation.id);
-                  }}
-                  className={
-                    Number(activeConversation?.id) === Number(conversation.id) ? 'active' : ''
-                  }
-                >
-                  <span>{conversation.shop_name || 'Approved ABUAD shop'}</span>
-                  <small>
-                    {[conversation.vendor_first_name, conversation.vendor_last_name]
-                      .filter(Boolean)
-                      .join(' ') || 'Verified vendor'}
-                  </small>
-                  <time>
-                    {conversation.updated_at
-                      ? new Date(conversation.updated_at).toLocaleDateString()
-                      : ''}
-                  </time>
-                </button>
-              ))
-            )}
-          </div>
+          ) : (
+            <div className="luxury-chat-list">
+              {loading ? (
+                <p className="chat-empty-hint">Loading…</p>
+              ) : conversations.length === 0 ? (
+                <p className="chat-empty-hint">No chats yet. Open “All vendors” and message someone.</p>
+              ) : (
+                conversations.map((conv) => (
+                  <button
+                    type="button"
+                    key={conv.id}
+                    className={`customer-chat-conversation luxury-chat-item ${
+                      activeConversation?.id === conv.id ? 'active' : ''
+                    }`}
+                    onClick={() => selectConversation(conv)}
+                  >
+                    <span className="chat-avatar">{titleFor(conv).charAt(0).toUpperCase()}</span>
+                    <span className="chat-item-copy">
+                      <span className="chat-item-name">{titleFor(conv)}</span>
+                      <span className="chat-item-time">
+                        {conv.updated_at ? new Date(conv.updated_at).toLocaleString() : ''}
+                      </span>
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
         </aside>
 
-        <section className="support-chat-thread">
+        <section className="customer-chat-thread luxury-chat-thread" style={{ display: 'flex' }}>
           {activeConversation ? (
             <>
-              <header>
-                <div className="support-chat-avatar">
-                  {(activeConversation.shop_name || 'A').charAt(0)}
-                </div>
-                <div>
-                  <h2>{activeConversation.shop_name || 'Approved ABUAD shop'}</h2>
+              <header className="customer-chat-thread-head luxury-chat-thread-head">
+                <div className="chat-avatar chat-avatar-lg">{titleFor(activeConversation).charAt(0).toUpperCase()}</div>
+                <div className="min-w-0 flex-1">
+                  <h3>{titleFor(activeConversation)}</h3>
                   <p>
-                    <ShieldCheck size={13} />
-                    Approved vendor · administrator support
+                    <ShieldCheck size={12} className="inline" /> Vendor support
                   </p>
                 </div>
               </header>
-              <div className="support-chat-messages">
+              <div className="luxury-chat-messages">
                 {messages.length === 0 ? (
-                  <p className="support-chat-empty">No messages yet.</p>
+                  <p className="chat-empty-hint">No messages yet — send the first one.</p>
                 ) : (
                   messages.map((message) => (
                     <MessageBubble
@@ -199,9 +289,10 @@ const VendorChats = () => {
               />
             </>
           ) : (
-            <div className="support-chat-empty">
+            <div className="luxury-chat-placeholder" style={{ display: 'flex' }}>
               <MessageCircleMore size={28} />
-              <p>Select a vendor conversation.</p>
+              <p>Select a chat or message a vendor</p>
+              <span>Use the “All vendors” tab to start a conversation anytime.</span>
             </div>
           )}
         </section>
