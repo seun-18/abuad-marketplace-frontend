@@ -17,6 +17,8 @@ import CheckoutVerify from './pages/public/CheckoutVerify';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import VerifyEmail from './pages/auth/VerifyEmail';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 import Wishlist from './pages/customer/Wishlist';
 import CustomerOrders from './pages/customer/Orders';
 import Following from './pages/customer/Following';
@@ -54,6 +56,8 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/login" element={<Login />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/register" element={<Register />} />
 
           {/* Customer Only */}

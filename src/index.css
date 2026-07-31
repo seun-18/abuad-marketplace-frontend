@@ -6206,3 +6206,7 @@ html[data-theme='light'] .auth-password-toggle:hover {
 html[data-theme='light'] .auth-field-hint {
   color: rgba(29, 29, 31, 0.45);
 }
+
+.auth-forgot-row { display:flex; justify-content:flex-end; margin-top:-0.35rem; }
+.auth-forgot-link { font-size:0.8rem; font-weight:600; color:#ffb703; text-decoration:none; }
+.auth-forgot-link:hover { text-decoration:underline; }
