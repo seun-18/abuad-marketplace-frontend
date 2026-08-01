@@ -2,6 +2,8 @@ import {
   ArrowUpRight,
   BadgeCheck,
   Banknote,
+  CheckCircle2,
+  Clock3,
   MapPin,
   PackageCheck,
   ShieldCheck,
@@ -12,6 +14,13 @@ import {
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios';
+
+const money = (n) => `₦${Number(n || 0).toLocaleString()}`;
+
+const vendorLabel = (row) =>
+  row.shop_name ||
+  [row.first_name, row.last_name].filter(Boolean).join(' ') ||
+  `Vendor #${row.vendor_id}`;
 
 const AdminDashboard = () => {
   const [metrics, setMetrics] = useState({
@@ -25,6 +34,16 @@ const AdminDashboard = () => {
     gross_revenue: 0,
     net_platform_commission: 0,
     pending_payouts_total: 0,
+    pending_payouts_count: 0,
+    paid_payouts_total: 0,
+    paid_payouts_count: 0,
+    requested_today_total: 0,
+    requested_today_count: 0,
+    paid_today_total: 0,
+    paid_today_count: 0,
+    paid_today: [],
+    requested_today: [],
+    pending_queue: [],
     total_follows: 0,
     total_updates: 0,
     updates_last_24h: 0,
@@ -78,193 +97,284 @@ const AdminDashboard = () => {
   const statCards = [
     {
       label: 'Marketplace revenue',
-      value: `₦${Number(metrics.gross_revenue).toLocaleString()}`,
+      value: money(metrics.gross_revenue),
       detail: `${Number(metrics.total_orders).toLocaleString()} paid orders`,
-      Icon: Banknote,
-      tone: 'gold',
+      icon: Banknote,
     },
     {
       label: 'Approved vendors',
       value: Number(metrics.approved_vendors).toLocaleString(),
       detail: `${Number(metrics.pending_vendors).toLocaleString()} awaiting review`,
-      Icon: UserCheck,
-      tone: 'green',
+      icon: Store,
     },
     {
       label: 'Customers',
       value: Number(metrics.total_customers).toLocaleString(),
       detail: `${Number(metrics.total_follows).toLocaleString()} vendor follows`,
-      Icon: Users,
-      tone: 'violet',
+      icon: Users,
     },
     {
-      label: 'Active products',
+      label: 'Live products',
       value: Number(metrics.total_products).toLocaleString(),
       detail: `${Number(metrics.active_locations).toLocaleString()} ABUAD fulfilment points`,
-      Icon: Store,
-      tone: 'blue',
+      icon: PackageCheck,
     },
   ];
 
   return (
-    <div className="premium-dashboard-page">
-      <div className="dashboard-title-row">
+    <div className="premium-dashboard-page admin-monitor-page space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="dashboard-kicker">Platform control centre</p>
-          <h1>ABUAD Market Place intelligence.</h1>
-          <p>Vendor trust, orders, revenue, community activity, and fulfilment health.</p>
+          <p className="dashboard-kicker">Super admin</p>
+          <h1>Platform monitor</h1>
+          <p className="dashboard-lead">
+            Revenue, vendor payouts, and who was paid — live overview for today.
+          </p>
         </div>
-        <div className="dashboard-verification">
-          <ShieldCheck size={17} />
-          <span>
-            <strong>Super admin</strong>
-            Protected management session
-          </span>
-        </div>
+        <Link to="/admin/payouts" className="chat-start-btn chat-tab-start inline-flex items-center gap-1">
+          Open payouts <ArrowUpRight size={14} />
+        </Link>
       </div>
 
-      <div className="dashboard-stat-grid">
-        {statCards.map(({ label, value, detail, Icon, tone }) => (
-          <article key={label} className={`dashboard-stat-card dashboard-stat-${tone}`}>
-            <div>
-              <p>{label}</p>
-              <Icon size={18} />
-            </div>
-            <strong>{value}</strong>
-            <span>{detail}</span>
-          </article>
-        ))}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {statCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <article key={card.label} className="dashboard-stat-card dashboard-panel">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold opacity-55">{card.label}</span>
+                <Icon size={16} className="opacity-40" />
+              </div>
+              <strong className="block text-xl mt-1">{card.value}</strong>
+              <p className="text-xs opacity-50 mt-1">{card.detail}</p>
+            </article>
+          );
+        })}
       </div>
 
-      <div className="dashboard-admin-grid">
-        <section className="dashboard-panel admin-revenue-panel">
-          <div className="panel-heading">
-            <div>
-              <p>Financial overview</p>
-              <span>Verified successful payments only</span>
+      {/* Payout monitor */}
+      <section className="dashboard-panel space-y-4 payout-monitor">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="dashboard-kicker">Payouts today</p>
+            <h2 className="text-lg font-semibold">Who got paid & who requested</h2>
+          </div>
+          <Link to="/admin/payouts" className="text-sm font-semibold text-amber-600 hover:underline">
+            Manage all →
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="monitor-metric">
+            <span>Requested today</span>
+            <strong>{money(metrics.requested_today_total)}</strong>
+            <em>{Number(metrics.requested_today_count || 0)} requests</em>
+          </div>
+          <div className="monitor-metric monitor-metric-ok">
+            <span>Paid today</span>
+            <strong>{money(metrics.paid_today_total)}</strong>
+            <em>{Number(metrics.paid_today_count || 0)} vendors paid</em>
+          </div>
+          <div className="monitor-metric monitor-metric-warn">
+            <span>Still pending</span>
+            <strong>{money(metrics.pending_payouts_total)}</strong>
+            <em>{Number(metrics.pending_payouts_count || 0)} in queue</em>
+          </div>
+          <div className="monitor-metric">
+            <span>All-time paid</span>
+            <strong>{money(metrics.paid_payouts_total)}</strong>
+            <em>{Number(metrics.paid_payouts_count || 0)} completed</em>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="monitor-list">
+            <h3 className="monitor-list-title">
+              <CheckCircle2 size={14} /> Paid today
+            </h3>
+            {(metrics.paid_today || []).length === 0 ? (
+              <p className="dashboard-empty text-sm">No vendors paid yet today.</p>
+            ) : (
+              <ul>
+                {(metrics.paid_today || []).map((row) => (
+                  <li key={row.payout_id}>
+                    <div>
+                      <strong>{vendorLabel(row)}</strong>
+                      <span>
+                        {[row.first_name, row.last_name].filter(Boolean).join(' ')}
+                        {row.email ? ` · ${row.email}` : ''}
+                      </span>
+                    </div>
+                    <div className="monitor-amount">
+                      <strong>{money(row.amount)}</strong>
+                      <span>net {money(row.net_amount)}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="monitor-list">
+            <h3 className="monitor-list-title">
+              <Clock3 size={14} /> Requested today
+            </h3>
+            {(metrics.requested_today || []).length === 0 ? (
+              <p className="dashboard-empty text-sm">No payout requests created today.</p>
+            ) : (
+              <ul>
+                {(metrics.requested_today || []).map((row) => (
+                  <li key={row.payout_id}>
+                    <div>
+                      <strong>{vendorLabel(row)}</strong>
+                      <span className="capitalize">
+                        {row.status}
+                        {row.created_at
+                          ? ` · ${new Date(row.created_at).toLocaleTimeString()}`
+                          : ''}
+                      </span>
+                    </div>
+                    <div className="monitor-amount">
+                      <strong>{money(row.amount)}</strong>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="monitor-list">
+            <h3 className="monitor-list-title">
+              <Banknote size={14} /> Pending queue
+            </h3>
+            {(metrics.pending_queue || []).length === 0 ? (
+              <p className="dashboard-empty text-sm">Queue is clear.</p>
+            ) : (
+              <ul>
+                {(metrics.pending_queue || []).map((row) => (
+                  <li key={row.payout_id}>
+                    <div>
+                      <strong>{vendorLabel(row)}</strong>
+                      <span>
+                        {[row.first_name, row.last_name].filter(Boolean).join(' ')}
+                      </span>
+                    </div>
+                    <div className="monitor-amount">
+                      <strong>{money(row.amount)}</strong>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <section className="dashboard-panel space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Finance snapshot</h2>
+            <ShieldCheck size={16} className="opacity-40" />
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between gap-2">
+              <span className="opacity-55">Gross revenue</span>
+              <strong>{money(metrics.gross_revenue)}</strong>
             </div>
-            <Banknote size={18} />
-          </div>
-          <div className="admin-revenue-hero">
-            <span>Gross marketplace revenue</span>
-            <strong>₦{Number(metrics.gross_revenue).toLocaleString()}</strong>
-          </div>
-          <div className="admin-finance-grid">
-            <p>
-              <span>Platform commission</span>
-              <strong>₦{Number(metrics.net_platform_commission).toLocaleString()}</strong>
-            </p>
-            <p>
-              <span>Pending payouts</span>
-              <strong>₦{Number(metrics.pending_payouts_total).toLocaleString()}</strong>
-            </p>
-            <p>
-              <span>Published updates</span>
-              <strong>{Number(metrics.total_updates).toLocaleString()}</strong>
-            </p>
-            <p>
-              <span>Updates today</span>
+            <div className="flex justify-between gap-2">
+              <span className="opacity-55">Platform commission</span>
+              <strong>{money(metrics.net_platform_commission)}</strong>
+            </div>
+            <div className="flex justify-between gap-2">
+              <span className="opacity-55">Pending payouts</span>
+              <strong>{money(metrics.pending_payouts_total)}</strong>
+            </div>
+            <div className="flex justify-between gap-2">
+              <span className="opacity-55">Vendor updates (24h)</span>
               <strong>{Number(metrics.updates_last_24h).toLocaleString()}</strong>
-            </p>
+            </div>
           </div>
         </section>
 
-        <section className="dashboard-panel">
-          <div className="panel-heading">
-            <div>
-              <p>Vendor approvals</p>
-              <span>Review before stores can publish</span>
-            </div>
-            <BadgeCheck size={18} />
+        <section className="dashboard-panel space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Pending vendor approvals</h2>
+            <UserCheck size={16} className="opacity-40" />
           </div>
           {pendingVendors.length === 0 ? (
-            <p className="dashboard-empty">No vendor applications are waiting.</p>
+            <p className="dashboard-empty text-sm">No vendors waiting for approval.</p>
           ) : (
-            <div className="approval-list">
-              {pendingVendors.slice(0, 5).map((vendor) => (
-                <div key={vendor.vendor_id}>
-                  <span className="approval-avatar">{vendor.shop_name?.charAt(0) || 'V'}</span>
+            <ul className="space-y-2">
+              {pendingVendors.slice(0, 6).map((v) => (
+                <li
+                  key={v.vendor_id}
+                  className="flex flex-wrap items-center justify-between gap-2 border-b border-black/5 dark:border-white/5 pb-2"
+                >
                   <div>
-                    <p>{vendor.shop_name}</p>
-                    <span>
-                      {vendor.first_name} {vendor.last_name} · {vendor.email}
-                    </span>
+                    <strong>{v.shop_name || `Vendor #${v.vendor_id}`}</strong>
+                    <p className="text-xs opacity-50">
+                      {[v.first_name, v.last_name].filter(Boolean).join(' ')} · {v.email}
+                    </p>
                   </div>
                   <button
                     type="button"
-                    onClick={() => approveVendor(vendor.vendor_id)}
-                    disabled={approvingId === vendor.vendor_id}
+                    className="chat-start-btn chat-tab-start"
+                    style={{ width: 'auto', padding: '0.4rem 0.75rem', fontSize: '0.75rem' }}
+                    disabled={approvingId === v.vendor_id}
+                    onClick={() => approveVendor(v.vendor_id)}
                   >
-                    {approvingId === vendor.vendor_id ? 'Approving…' : 'Approve'}
+                    {approvingId === v.vendor_id ? '…' : 'Approve'}
                   </button>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
-          <Link to="/admin/vendors" className="dashboard-action-link">
-            Manage all vendors
-            <ArrowUpRight size={16} />
+          <Link to="/admin/vendors" className="text-sm font-semibold text-amber-600 hover:underline">
+            All vendors →
           </Link>
         </section>
       </div>
 
-      <div className="dashboard-two-column dashboard-bottom-grid">
-        <section className="dashboard-panel">
-          <div className="panel-heading">
-            <div>
-              <p>Recent marketplace orders</p>
-              <span>Latest activity across ABUAD</span>
-            </div>
-            <PackageCheck size={18} />
+      <section className="dashboard-panel space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Recent orders</h2>
+          <BadgeCheck size={16} className="opacity-40" />
+        </div>
+        {(metrics.recent_orders || []).length === 0 ? (
+          <p className="dashboard-empty text-sm">No orders yet.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left opacity-50">
+                  <th className="py-2 pr-3">Order</th>
+                  <th className="py-2 pr-3">Customer</th>
+                  <th className="py-2 pr-3">Status</th>
+                  <th className="py-2 pr-3">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {metrics.recent_orders.map((order) => (
+                  <tr key={order.order_number} className="border-t border-black/5 dark:border-white/10">
+                    <td className="py-2 pr-3 font-medium">{order.order_number}</td>
+                    <td className="py-2 pr-3">
+                      {[order.first_name, order.last_name].filter(Boolean).join(' ')}
+                    </td>
+                    <td className="py-2 pr-3 capitalize">{order.status}</td>
+                    <td className="py-2 pr-3">{money(order.total_amount)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          {(metrics.recent_orders || []).length === 0 ? (
-            <p className="dashboard-empty">Orders will appear here.</p>
-          ) : (
-            <div className="dashboard-order-list">
-              {metrics.recent_orders.map((order) => (
-                <div key={order.order_number}>
-                  <span className="order-icon">
-                    <PackageCheck size={15} />
-                  </span>
-                  <div>
-                    <p>
-                      {order.first_name} {order.last_name}
-                    </p>
-                    <span>
-                      #{order.order_number} · {order.delivery_method.replace('_', ' ')}
-                    </span>
-                  </div>
-                  <div>
-                    <strong>₦{Number(order.total_amount).toLocaleString()}</strong>
-                    <span className={`order-status order-status-${order.status}`}>
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        )}
+      </section>
 
-        <section className="dashboard-panel admin-campus-panel">
-          <div className="panel-heading">
-            <div>
-              <p>ABUAD fulfilment</p>
-              <span>Campus pickup and delivery coverage</span>
-            </div>
-            <MapPin size={18} />
-          </div>
-          <div>
-            <MapPin size={26} />
-            <strong>{Number(metrics.active_locations).toLocaleString()}</strong>
-            <span>active campus points</span>
-          </div>
-          <p>
-            Pickup hubs, colleges, hostel reception, and campus landmarks are centrally configured
-            for consistent delivery fees.
-          </p>
-        </section>
-      </div>
+      <section className="dashboard-panel flex flex-wrap items-center gap-3 text-sm">
+        <MapPin size={16} className="opacity-40" />
+        <span className="opacity-55">Active campus locations</span>
+        <strong>{Number(metrics.active_locations).toLocaleString()}</strong>
+      </section>
     </div>
   );
 };

@@ -5,6 +5,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { WishlistProvider } from './context/WishlistContext';
 import './index.css';
 
@@ -13,11 +14,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ErrorBoundary>
       <ThemeProvider>
         <AuthProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <App />
-            </WishlistProvider>
-          </CartProvider>
+          <NotificationProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <App />
+              </WishlistProvider>
+            </CartProvider>
+          </NotificationProvider>
         </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>

@@ -12,6 +12,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [needsVerify, setNeedsVerify] = useState(false);
 
   const notice = location.state?.notice || '';
 
@@ -22,6 +23,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setNeedsVerify(false);
     setSubmitting(true);
 
     try {
@@ -38,7 +40,15 @@ const Login = () => {
           navigate('/', { replace: true });
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Invalid email or password.');
+      const data = err.response?.data;
+      const msg =
+        data?.message ||
+        err.message ||
+        'Invalid email or password.';
+      setError(msg);
+      if (data?.data?.requires_verification || /verify your email/i.test(msg)) {
+        setNeedsVerify(true);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -57,6 +67,12 @@ const Login = () => {
 
         {notice && <div className="auth-alert auth-alert-success">{notice}</div>}
         {error && <div className="auth-alert auth-alert-error">{error}</div>}
+        {needsVerify && (
+          <p className="auth-field-hint" style={{ marginTop: '-0.25rem' }}>
+            Open the link we emailed you, or register again if it expired.{' '}
+            <Link to="/verify-email">Verification help</Link>
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -100,8 +116,11 @@ const Login = () => {
           </div>
 
           <div className="auth-forgot-row">
-            <Link to="/forgot-password" className="auth-forgot-link">Forgot password?</Link>
+            <Link to="/forgot-password" className="auth-forgot-link">
+              Forgot password?
+            </Link>
           </div>
+
           <button type="submit" disabled={submitting} className="auth-submit">
             {submitting ? 'Signing in…' : 'Sign in'}
           </button>

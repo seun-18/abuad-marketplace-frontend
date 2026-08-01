@@ -6419,3 +6419,402 @@ body,
 .nav-theme-toggle {
   margin-right: 0.15rem;
 }
+
+/* ========== LIGHT MODE: white text → black/gray hierarchy ========== */
+
+html[data-theme='light'] {
+  --text: #1d1d1f;
+  --text-muted: rgba(29, 29, 31, 0.58);
+  --text-faint: rgba(29, 29, 31, 0.42);
+  --surface: #f4f4f6;
+  --surface-elevated: #ffffff;
+  --border: rgba(0, 0, 0, 0.08);
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  --text: #f5f5f7;
+  --text-muted: rgba(255, 255, 255, 0.58);
+  --text-faint: rgba(255, 255, 255, 0.4);
+  --surface: #000000;
+  --surface-elevated: #0a0a0a;
+  --border: rgba(255, 255, 255, 0.1);
+  color-scheme: dark;
+}
+
+/* Global text in light mode — never pure white */
+html[data-theme='light'] body,
+html[data-theme='light'] #root,
+html[data-theme='light'] .dashboard-shell,
+html[data-theme='light'] .dashboard-shell *,
+html[data-theme='light'] .premium-dashboard-page,
+html[data-theme='light'] .home-layout,
+html[data-theme='light'] .market-dark,
+html[data-theme='light'] .auth-page {
+  color: #1d1d1f;
+}
+
+html[data-theme='light'] h1,
+html[data-theme='light'] h2,
+html[data-theme='light'] h3,
+html[data-theme='light'] h4,
+html[data-theme='light'] strong,
+html[data-theme='light'] .dashboard-shell h1,
+html[data-theme='light'] .dashboard-shell h2,
+html[data-theme='light'] .dashboard-shell h3,
+html[data-theme='light'] .premium-dashboard-page h1,
+html[data-theme='light'] .premium-dashboard-page h2 {
+  color: #0a0a0a !important;
+}
+
+html[data-theme='light'] p,
+html[data-theme='light'] span,
+html[data-theme='light'] label,
+html[data-theme='light'] li,
+html[data-theme='light'] td,
+html[data-theme='light'] th,
+html[data-theme='light'] .dashboard-lead,
+html[data-theme='light'] .dashboard-kicker,
+html[data-theme='light'] .text-white,
+html[data-theme='light'] .text-gray-100,
+html[data-theme='light'] .text-gray-200,
+html[data-theme='light'] .text-gray-300 {
+  color: #1d1d1f !important;
+}
+
+html[data-theme='light'] .opacity-50,
+html[data-theme='light'] .opacity-55,
+html[data-theme='light'] .opacity-40,
+html[data-theme='light'] .opacity-60,
+html[data-theme='light'] .text-muted,
+html[data-theme='light'] .dashboard-empty,
+html[data-theme='light'] .chat-item-time {
+  color: rgba(29, 29, 31, 0.55) !important;
+}
+
+html[data-theme='light'] .dashboard-panel,
+html[data-theme='light'] .dashboard-stat-card,
+html[data-theme='light'] .monitor-metric,
+html[data-theme='light'] .monitor-list {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #1d1d1f !important;
+}
+
+html[data-theme='light'] .dashboard-sidebar,
+html[data-theme='light'] .dashboard-header {
+  background: rgba(255, 255, 255, 0.96) !important;
+  color: #1d1d1f !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-theme='light'] .dashboard-sidebar-link {
+  color: rgba(29, 29, 31, 0.62) !important;
+}
+
+html[data-theme='light'] .dashboard-sidebar-link-active,
+html[data-theme='light'] .dashboard-sidebar-brand {
+  color: #0a0a0a !important;
+}
+
+html[data-theme='light'] .dashboard-header-name,
+html[data-theme='light'] .dashboard-header-button,
+html[data-theme='light'] .theme-toggle {
+  color: #1d1d1f !important;
+}
+
+/* Keep gold accents readable */
+html[data-theme='light'] .text-amber-600,
+html[data-theme='light'] a.text-amber-600 {
+  color: #a67c00 !important;
+}
+
+/* Payout monitor layout */
+.payout-monitor .monitor-metric {
+  border-radius: 0.9rem;
+  padding: 0.9rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.payout-monitor .monitor-metric span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.payout-monitor .monitor-metric strong {
+  font-size: 1.15rem;
+}
+
+.payout-monitor .monitor-metric em {
+  font-style: normal;
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
+
+.payout-monitor .monitor-metric-ok {
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+.payout-monitor .monitor-metric-warn {
+  border-color: rgba(255, 183, 3, 0.3);
+}
+
+.monitor-list {
+  border-radius: 0.9rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  min-height: 10rem;
+}
+
+.monitor-list-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+}
+
+.monitor-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.monitor-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+}
+
+.monitor-list li strong {
+  display: block;
+  font-size: 0.88rem;
+}
+
+.monitor-list li span {
+  display: block;
+  font-size: 0.72rem;
+  opacity: 0.55;
+}
+
+.monitor-amount {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.monitor-amount strong {
+  font-size: 0.88rem;
+}
+
+.monitor-amount span {
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
+html[data-theme='light'] .payout-monitor .monitor-metric,
+html[data-theme='light'] .monitor-list {
+  background: #f7f7f9 !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-theme='light'] .monitor-list li {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-lead {
+  font-size: 0.92rem;
+  opacity: 0.6;
+  max-width: 36rem;
+}
+
+.dashboard-loading {
+  padding: 3rem 1rem;
+  text-align: center;
+  opacity: 0.6;
+}
+
+
+/* ========== Real-time notification UI ========== */
+.notification-bell-wrap {
+  position: relative;
+}
+
+.notification-bell-btn {
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -0.2rem;
+  right: -0.2rem;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: #ffb703;
+  color: #0a0a0a;
+  font-size: 0.62rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+}
+
+.notification-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.45rem);
+  width: min(22rem, 88vw);
+  max-height: 24rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #121214;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  z-index: 80;
+}
+
+html[data-theme='light'] .notification-dropdown {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+  color: #1d1d1f;
+}
+
+.notification-dropdown-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+}
+
+.notification-mark-all {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #ffb703;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.notification-dropdown-list {
+  overflow-y: auto;
+  max-height: 16rem;
+}
+
+.notification-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.7rem 0.9rem;
+  border: none;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.12);
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+}
+
+.notification-item.unread {
+  background: rgba(255, 183, 3, 0.08);
+}
+
+.notification-item strong {
+  display: block;
+  font-size: 0.85rem;
+}
+
+.notification-item span {
+  display: block;
+  font-size: 0.78rem;
+  opacity: 0.7;
+  margin-top: 0.15rem;
+}
+
+.notification-item em {
+  display: block;
+  font-style: normal;
+  font-size: 0.68rem;
+  opacity: 0.45;
+  margin-top: 0.25rem;
+}
+
+.notification-empty {
+  padding: 1.25rem;
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.55;
+}
+
+.notification-footer-link {
+  display: block;
+  padding: 0.7rem 0.9rem;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffb703;
+  border-top: 1px solid rgba(128, 128, 128, 0.15);
+  text-decoration: none;
+}
+
+.notification-toast {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 100;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  max-width: min(22rem, calc(100vw - 2rem));
+  padding: 0.9rem 1rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 183, 3, 0.35);
+  background: #121214;
+  color: #f5f5f7;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme='light'] .notification-toast {
+  background: #fff;
+  color: #1d1d1f;
+  border-color: rgba(201, 146, 0, 0.35);
+}
+
+.notification-toast strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.notification-toast p {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.notification-toast button {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+  opacity: 0.6;
+  line-height: 1;
+}

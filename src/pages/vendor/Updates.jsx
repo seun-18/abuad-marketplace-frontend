@@ -1,25 +1,26 @@
-import { Image, Megaphone, Send, Trash2, Users } from 'lucide-react';
+import { Image, Megaphone, Send, Trash2, Upload } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 
 const VendorUpdates = () => {
   const [updates, setUpdates] = useState([]);
   const [body, setBody] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [error, setError] = useState('');
 
   const loadUpdates = async () => {
     try {
       const dashboard = await api.get('/vendors/dashboard.php');
-      const vendorId = dashboard.data.data?.profile ? dashboard.data.data?.profile.vendor_id : null;
+      const vendorId = dashboard.data.data?.profile?.vendor_id || null;
       const query = vendorId ? `?vendor_id=${vendorId}&limit=30` : '?limit=30';
       const response = await api.get(`/vendors/updates.php${query}`);
       if (response.data.success) setUpdates(response.data.data || []);
-    } catch (error) {
-      console.error('Failed to load store updates:', error);
-      setFeedback(error.response?.data?.message || 'Could not load updates.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not load updates.');
     } finally {
       setLoading(false);
     }
@@ -29,23 +30,54 @@ const VendorUpdates = () => {
     loadUpdates();
   }, []);
 
+  const onPickImage = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setImageFile(null);
+      setImagePreview('');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image must be 5 MB or smaller.');
+      return;
+    }
+    setError('');
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const publishUpdate = async (event) => {
     event.preventDefault();
+    if (!body.trim()) {
+      setError('Write a short update first.');
+      return;
+    }
     setSubmitting(true);
     setFeedback('');
+    setError('');
     try {
+      let imageUrl = '';
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append('image', imageFile);
+        const upload = await api.post('/vendors/upload_update_image.php', fd, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        imageUrl = upload.data?.data?.url || '';
+      }
       const response = await api.post('/vendors/updates.php', {
-        body,
+        body: body.trim(),
         image_url: imageUrl,
       });
       if (response.data.success) {
         setBody('');
-        setImageUrl('');
-        setFeedback('Your update is now live for your followers.');
+        setImageFile(null);
+        setImagePreview('');
+        setFeedback('Your update is live for your followers.');
         await loadUpdates();
       }
-    } catch (error) {
-      setFeedback(error.response?.data?.message || 'Could not publish this update.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not publish this update.');
     } finally {
       setSubmitting(false);
     }
@@ -55,94 +87,97 @@ const VendorUpdates = () => {
     try {
       await api.delete(`/vendors/updates.php?id=${id}`);
       setUpdates((current) => current.filter((update) => Number(update.id) !== Number(id)));
-    } catch (error) {
-      setFeedback(error.response?.data?.message || 'Could not remove this update.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not remove this update.');
     }
   };
 
   return (
-    <div className="premium-dashboard-page">
+    <div className="premium-dashboard-page space-y-6">
       <div className="dashboard-title-row">
         <div>
           <p className="dashboard-kicker">Store community</p>
-          <h1>Updates for your followers.</h1>
-          <p>Share new arrivals, restocks, pickup times, and short store announcements.</p>
+          <h1>Updates for your followers</h1>
+          <p className="dashboard-lead">
+            Share new arrivals, restocks, and pickup times. Attach a photo from your device.
+          </p>
         </div>
         <div className="dashboard-title-icon">
           <Megaphone size={22} />
         </div>
       </div>
 
-      <div className="updates-layout">
-        <form onSubmit={publishUpdate} className="dashboard-panel update-composer">
-          <div className="panel-heading">
-            <div>
-              <p>Publish an update</p>
-              <span>Approved vendors only · 1,000 characters maximum</span>
-            </div>
-            <Send size={18} />
-          </div>
+      {feedback && <div className="auth-alert auth-alert-success">{feedback}</div>}
+      {error && <div className="auth-alert auth-alert-error">{error}</div>}
+
+      <form onSubmit={publishUpdate} className="dashboard-panel space-y-4">
+        <label className="block">
+          <span className="text-xs font-semibold opacity-60">Update text</span>
           <textarea
             value={body}
-            onChange={(event) => setBody(event.target.value)}
-            maxLength={1000}
-            minLength={3}
+            onChange={(e) => setBody(e.target.value)}
+            rows={4}
             required
-            rows={7}
-            placeholder="Tell your followers what is new..."
+            maxLength={1000}
+            placeholder="e.g. Fresh stock of notebooks available for hostel pickup today…"
+            className="mt-1 w-full"
           />
-          <label className="update-image-field">
-            <Image size={16} />
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={(event) => setImageUrl(event.target.value)}
-              placeholder="Optional image URL"
-            />
-          </label>
-          <div className="update-composer-footer">
-            <span>{body.length}/1,000</span>
-            <button type="submit" disabled={submitting || body.trim().length < 3}>
-              {submitting ? 'Publishing…' : 'Publish update'}
-            </button>
-          </div>
-          {feedback && <p className="dashboard-feedback">{feedback}</p>}
-        </form>
+        </label>
 
-        <section className="dashboard-panel">
-          <div className="panel-heading">
-            <div>
-              <p>Recent updates</p>
-              <span>Visible to marketplace shoppers and your followers</span>
-            </div>
-            <Users size={18} />
-          </div>
-          {loading ? (
-            <p className="dashboard-empty">Loading updates…</p>
-          ) : updates.length === 0 ? (
-            <p className="dashboard-empty">Your first store update will appear here.</p>
+        <label className="local-image-upload">
+          <span className="text-xs font-semibold opacity-60">Photo from your device (optional)</span>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            onChange={onPickImage}
+          />
+          {imagePreview ? (
+            <img src={imagePreview} alt="Preview" className="local-upload-preview" />
           ) : (
-            <div className="vendor-update-list">
-              {updates.map((update) => (
-                <article key={update.id}>
-                  {update.image_url && <img src={update.image_url} alt="" />}
-                  <div>
-                    <p>{update.body}</p>
-                    <span>{new Date(update.created_at).toLocaleString()}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeUpdate(update.id)}
-                    aria-label="Remove update"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </article>
-              ))}
-            </div>
+            <span className="local-upload-empty">
+              <Upload size={18} /> Tap to choose image from gallery / files
+            </span>
           )}
-        </section>
-      </div>
+          {imageFile && <small className="local-upload-file">{imageFile.name}</small>}
+        </label>
+
+        <button type="submit" disabled={submitting} className="chat-start-btn inline-flex items-center gap-2">
+          <Send size={16} />
+          {submitting ? 'Publishing…' : 'Publish update'}
+        </button>
+      </form>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Recent updates</h2>
+        {loading ? (
+          <p className="dashboard-empty">Loading…</p>
+        ) : updates.length === 0 ? (
+          <p className="dashboard-empty">No updates published yet.</p>
+        ) : (
+          updates.map((update) => (
+            <article key={update.id} className="dashboard-panel space-y-2">
+              <p>{update.body}</p>
+              {update.image_url && (
+                <img
+                  src={update.image_url}
+                  alt=""
+                  className="max-h-56 w-full rounded-xl object-cover"
+                />
+              )}
+              <div className="flex items-center justify-between gap-2 text-xs opacity-50">
+                <span>{update.created_at ? new Date(update.created_at).toLocaleString() : ''}</span>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-rose-500"
+                  onClick={() => removeUpdate(update.id)}
+                >
+                  <Trash2 size={14} /> Remove
+                </button>
+              </div>
+            </article>
+          ))
+        )}
+      </section>
     </div>
   );
 };

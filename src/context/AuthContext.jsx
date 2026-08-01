@@ -7,7 +7,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Re-hydrate session on app mount
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('token');
@@ -33,7 +32,9 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       return userData;
     }
-    throw new Error(response.data.message || 'Login failed');
+    const err = new Error(response.data.message || 'Login failed');
+    err.response = { data: response.data };
+    throw err;
   };
 
   const register = async (formData) => {
@@ -41,7 +42,9 @@ export const AuthProvider = ({ children }) => {
     if (response.data.success) {
       return response.data;
     }
-    throw new Error(response.data.message || 'Registration failed');
+    const err = new Error(response.data.message || 'Registration failed');
+    err.response = { data: response.data };
+    throw err;
   };
 
   const logout = () => {
