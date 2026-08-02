@@ -14,8 +14,8 @@ html[data-theme='dark'] {
   --text: #f5f5f7;
   --text-muted: rgba(255, 255, 255, 0.58);
   --text-faint: rgba(255, 255, 255, 0.4);
-  --surface: #000000;
-  --surface-elevated: #0a0a0a;
+  --surface: #0A0A0B;
+  --surface-elevated: #121215;
   --border: rgba(255, 255, 255, 0.1);
   color-scheme: dark;
 }
@@ -42,7 +42,7 @@ html[data-theme='light'] .dashboard-shell h2,
 html[data-theme='light'] .dashboard-shell h3,
 html[data-theme='light'] .premium-dashboard-page h1,
 html[data-theme='light'] .premium-dashboard-page h2 {
-  color: #0a0a0a !important;
+  color: #121215 !important;
 }
 
 html[data-theme='light'] p,
@@ -92,7 +92,7 @@ html[data-theme='light'] .dashboard-sidebar-link {
 
 html[data-theme='light'] .dashboard-sidebar-link-active,
 html[data-theme='light'] .dashboard-sidebar-brand {
-  color: #0a0a0a !important;
+  color: #121215 !important;
 }
 
 html[data-theme='light'] .dashboard-header-name,
@@ -141,7 +141,7 @@ html[data-theme='light'] a.text-amber-600 {
 }
 
 .payout-monitor .monitor-metric-warn {
-  border-color: rgba(255, 183, 3, 0.3);
+  border-color: rgba(201, 166, 105, 0.3);
 }
 
 .monitor-list {
