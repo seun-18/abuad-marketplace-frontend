@@ -1,18 +1,20 @@
-import { Image, Layers3, Plus, Trash2 } from 'lucide-react';
+import { Layers3, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
+import LocalImagePicker from '../../components/LocalImagePicker';
 import { resolveImageUrl } from '../../utils/imageUrl';
 
 const emptyForm = {
   name: '',
   parent_id: '',
   description: '',
-  image_url: '',
 };
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState(emptyForm);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -33,23 +35,59 @@ const AdminCategories = () => {
     fetchCategories();
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
+
+  const handleImage = (file) => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    if (!file) {
+      setImageFile(null);
+      setImagePreview('');
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const createCategory = async (event) => {
     event.preventDefault();
     setSubmitting(true);
     setError('');
     setFeedback('');
     try {
+      let imageUrl = '';
+      if (imageFile) {
+        const upload = new FormData();
+        upload.append('image', imageFile);
+        const uploadResponse = await api.post('/categories/upload_image.php', upload);
+        if (!uploadResponse.data?.success) {
+          throw new Error(uploadResponse.data?.message || 'Image upload failed.');
+        }
+        imageUrl = uploadResponse.data.data?.url || '';
+      }
+
       const response = await api.post('/categories/index.php', {
         ...form,
         parent_id: form.parent_id ? Number(form.parent_id) : null,
+        image_url: imageUrl || undefined,
       });
       if (response.data.success) {
         setForm(emptyForm);
+        handleImage(null);
         setFeedback('Category created and available to approved vendors.');
         await fetchCategories();
+      } else {
+        setError(response.data.message || 'Could not create category.');
       }
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Could not create category.');
+      setError(
+        requestError.response?.data?.message ||
+          requestError.message ||
+          'Could not create category.'
+      );
     } finally {
       setSubmitting(false);
     }
@@ -69,15 +107,15 @@ const AdminCategories = () => {
     }
   };
 
-  if (loading) return <div className="dashboard-loading">Loading category intelligence…</div>;
+  if (loading) return <div className="dashboard-loading">Loading categories…</div>;
 
   return (
     <div className="premium-dashboard-page">
       <div className="dashboard-title-row">
         <div>
           <p className="dashboard-kicker">Marketplace taxonomy</p>
-          <h1>Popular categories and imagery.</h1>
-          <p>Only administrators can change the global product structure.</p>
+          <h1>Categories &amp; cover art</h1>
+          <p>Only administrators change the global product structure.</p>
         </div>
         <div className="dashboard-title-icon">
           <Layers3 size={22} />
@@ -92,7 +130,7 @@ const AdminCategories = () => {
           <div className="panel-heading">
             <div>
               <p>Add a category</p>
-              <span>Include a strong image for the public discovery page</span>
+              <span>Pick a cover photo from your device</span>
             </div>
             <Plus size={18} />
           </div>
@@ -132,20 +170,17 @@ const AdminCategories = () => {
               }
             />
           </label>
-          <label>
-            <span>Cover image URL</span>
-            <div className="category-image-input">
-              <Image size={16} />
-              <input
-                type="url"
-                value={form.image_url}
-                placeholder="https://…"
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, image_url: event.target.value }))
-                }
-              />
-            </div>
-          </label>
+
+          <LocalImagePicker
+            label="Cover image"
+            hint="Landscape works best · JPG, PNG or WebP · max 5 MB"
+            accept="image/jpeg,image/png,image/webp"
+            file={imageFile}
+            previewUrl={imagePreview}
+            onChange={handleImage}
+            tall
+          />
+
           <button type="submit" disabled={submitting}>
             {submitting ? 'Creating…' : 'Create category'}
           </button>
@@ -155,7 +190,7 @@ const AdminCategories = () => {
           <div className="panel-heading">
             <div>
               <p>Category catalog</p>
-              <span>Automatically ranked using active products and sales</span>
+              <span>Ranked by active products and sales</span>
             </div>
             <Layers3 size={18} />
           </div>

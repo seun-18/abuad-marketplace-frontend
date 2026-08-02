@@ -30,7 +30,7 @@ function applyTheme(theme) {
   root.classList.toggle('light', theme === 'light');
   // Browser chrome (mobile address bar, etc.)
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', theme === 'dark' ? '#000000' : '#f5f5f7');
+  if (meta) meta.setAttribute('content', theme === 'dark' ? '#14102a' : '#f6f3ff');
   try {
     localStorage.setItem(STORAGE_KEY, theme);
   } catch {

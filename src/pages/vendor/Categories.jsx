@@ -1,6 +1,7 @@
-import { Image, Layers3, Plus, Upload } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { Image, Layers3, Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import api from '../../api/axios';
+import LocalImagePicker from '../../components/LocalImagePicker';
 import { resolveImageUrl } from '../../utils/imageUrl';
 
 const VendorCategories = () => {
@@ -11,19 +12,17 @@ const VendorCategories = () => {
     description: '',
   });
   const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [feedback, setFeedback] = useState('');
 
-  const previewUrl = useMemo(() => (imageFile ? URL.createObjectURL(imageFile) : ''), [imageFile]);
-
-  useEffect(
-    () => () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    },
-    [previewUrl]
-  );
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
 
   const fetchCategories = async () => {
     try {
@@ -40,24 +39,15 @@ const VendorCategories = () => {
     fetchCategories();
   }, []);
 
-  const selectCategoryImage = (event) => {
-    const file = event.target.files?.[0] || null;
+  const handleImage = (file) => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
     if (!file) {
       setImageFile(null);
+      setImagePreview('');
       return;
     }
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      setError('Choose a JPG, PNG, or WebP category image.');
-      event.target.value = '';
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Category images must be 5 MB or smaller.');
-      event.target.value = '';
-      return;
-    }
-    setError('');
     setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
   const submitCategory = async (event) => {
@@ -71,22 +61,31 @@ const VendorCategories = () => {
         const upload = new FormData();
         upload.append('image', imageFile);
         const uploadResponse = await api.post('/categories/upload_image.php', upload);
+        if (!uploadResponse.data?.success) {
+          throw new Error(uploadResponse.data?.message || 'Image upload failed.');
+        }
         imageUrl = uploadResponse.data.data?.url || '';
       }
 
       const response = await api.post('/categories/index.php', {
         ...form,
         parent_id: form.parent_id ? Number(form.parent_id) : null,
-        image_url: imageUrl,
+        image_url: imageUrl || undefined,
       });
       if (response.data.success) {
         setForm({ name: '', parent_id: '', description: '' });
-        setImageFile(null);
+        handleImage(null);
         setFeedback('Category created and ready for product listings.');
         await fetchCategories();
+      } else {
+        setError(response.data.message || 'Could not create this category.');
       }
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Could not create this category.');
+      setError(
+        requestError.response?.data?.message ||
+          requestError.message ||
+          'Could not create this category.'
+      );
     } finally {
       setSubmitting(false);
     }
@@ -99,8 +98,8 @@ const VendorCategories = () => {
       <div className="dashboard-title-row">
         <div>
           <p className="dashboard-kicker">Catalog organization</p>
-          <h1>Add a product category.</h1>
-          <p>Approved vendors can create a category and upload its cover from their device.</p>
+          <h1>Product categories</h1>
+          <p>Create a category and attach a cover photo from your phone or computer.</p>
         </div>
         <div className="dashboard-title-icon">
           <Layers3 size={22} />
@@ -115,7 +114,7 @@ const VendorCategories = () => {
           <div className="panel-heading">
             <div>
               <p>New category</p>
-              <span>Use a clear name and a real cover photo</span>
+              <span>Clear name · real cover photo</span>
             </div>
             <Plus size={18} />
           </div>
@@ -154,30 +153,19 @@ const VendorCategories = () => {
               onChange={(event) =>
                 setForm((current) => ({ ...current, description: event.target.value }))
               }
-              placeholder="What products belong in this category?"
+              placeholder="What products belong here?"
             />
           </label>
 
-          <label className="local-image-upload">
-            <span>Cover image from your device</span>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={selectCategoryImage}
-            />
-            <div>
-              {previewUrl ? (
-                <img src={previewUrl} alt="Category cover preview" />
-              ) : (
-                <span className="local-upload-empty">
-                  <Upload size={20} />
-                  Choose JPG, PNG, or WebP
-                  <small>Landscape images work best · maximum 5 MB</small>
-                </span>
-              )}
-            </div>
-            {imageFile && <small className="local-upload-file">{imageFile.name}</small>}
-          </label>
+          <LocalImagePicker
+            label="Cover image"
+            hint="Landscape preferred · JPG, PNG or WebP · max 5 MB"
+            accept="image/jpeg,image/png,image/webp"
+            file={imageFile}
+            previewUrl={imagePreview}
+            onChange={handleImage}
+            tall
+          />
 
           <button type="submit" disabled={submitting}>
             {submitting ? 'Uploading and creating…' : 'Create category'}
@@ -188,23 +176,27 @@ const VendorCategories = () => {
           <div className="panel-heading">
             <div>
               <p>Available categories</p>
-              <span>Select these when publishing your products</span>
+              <span>Use these when you publish products</span>
             </div>
             <Image size={18} />
           </div>
           <div className="admin-category-list">
-            {categories.map((category) => (
-              <article key={category.id}>
-                <img src={resolveImageUrl(category.category_image)} alt="" />
-                <div>
-                  <p>{category.name}</p>
-                  <span>
-                    {Number(category.product_count || 0).toLocaleString()} products ·{' '}
-                    {Number(category.units_sold || 0).toLocaleString()} sales
-                  </span>
-                </div>
-              </article>
-            ))}
+            {categories.length === 0 ? (
+              <p className="dashboard-empty">No categories yet.</p>
+            ) : (
+              categories.map((category) => (
+                <article key={category.id}>
+                  <img src={resolveImageUrl(category.category_image)} alt="" />
+                  <div>
+                    <p>{category.name}</p>
+                    <span>
+                      {Number(category.product_count || 0).toLocaleString()} products ·{' '}
+                      {Number(category.units_sold || 0).toLocaleString()} sales
+                    </span>
+                  </div>
+                </article>
+              ))
+            )}
           </div>
         </section>
       </div>

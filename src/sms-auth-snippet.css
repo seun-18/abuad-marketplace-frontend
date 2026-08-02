@@ -10,6 +10,6 @@
   cursor: pointer;
 }
 .auth-secondary-btn:hover {
-  border-color: rgba(201, 166, 105, 0.35);
-  color: #C9A669;
+  border-color: rgba(255, 183, 3, 0.35);
+  color: #ffb703;
 }
