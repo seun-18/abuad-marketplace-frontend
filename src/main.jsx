@@ -8,6 +8,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { WishlistProvider } from './context/WishlistContext';
 import './index.css';
+import './styles/light-mode-text.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
