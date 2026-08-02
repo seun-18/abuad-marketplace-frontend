@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../api/axios';
 
 const Login = () => {
   const { login } = useAuth();
@@ -11,7 +12,9 @@ const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [resending, setResending] = useState(false);
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
   const [needsVerify, setNeedsVerify] = useState(false);
 
   const notice = location.state?.notice || '';
@@ -23,6 +26,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setInfo('');
     setNeedsVerify(false);
     setSubmitting(true);
 
@@ -41,16 +45,39 @@ const Login = () => {
       }
     } catch (err) {
       const data = err.response?.data;
-      const msg =
-        data?.message ||
-        err.message ||
-        'Invalid email or password.';
+      const msg = data?.message || err.message || 'Invalid email or password.';
       setError(msg);
       if (data?.data?.requires_verification || /verify your email/i.test(msg)) {
         setNeedsVerify(true);
       }
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const resendVerification = async () => {
+    if (!formData.email.trim()) {
+      setError('Enter your email address first.');
+      return;
+    }
+    setResending(true);
+    setError('');
+    setInfo('');
+    try {
+      const res = await api.post('/auth/resend_verification.php', {
+        email: formData.email.trim(),
+      });
+      setInfo(res.data?.message || 'Verification email sent. Check inbox and spam.');
+      if (res.data?.data?.already_verified) {
+        setNeedsVerify(false);
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          'Could not send verification email. Brevo may still be misconfigured.'
+      );
+    } finally {
+      setResending(false);
     }
   };
 
@@ -66,12 +93,24 @@ const Login = () => {
         </p>
 
         {notice && <div className="auth-alert auth-alert-success">{notice}</div>}
+        {info && <div className="auth-alert auth-alert-success">{info}</div>}
         {error && <div className="auth-alert auth-alert-error">{error}</div>}
+
         {needsVerify && (
-          <p className="auth-field-hint" style={{ marginTop: '-0.25rem' }}>
-            Open the link we emailed you, or register again if it expired.{' '}
-            <Link to="/verify-email">Verification help</Link>
-          </p>
+          <div className="auth-alert" style={{ borderColor: 'rgba(255,183,3,0.35)' }}>
+            <p style={{ margin: '0 0 0.5rem' }}>
+              Your account exists but the email was never verified (the first email likely never sent).
+            </p>
+            <button
+              type="button"
+              className="auth-submit"
+              style={{ marginTop: '0.25rem' }}
+              disabled={resending}
+              onClick={resendVerification}
+            >
+              {resending ? 'Sending…' : 'Resend verification email'}
+            </button>
+          </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -108,9 +147,8 @@ const Login = () => {
                 className="auth-password-toggle"
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                title={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </div>
