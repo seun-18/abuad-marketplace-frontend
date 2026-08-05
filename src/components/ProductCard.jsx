@@ -1,11 +1,11 @@
 import { Heart, Plus, Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import { resolveImageUrl } from '../utils/imageUrl';
+import { getErrorMessage } from '../utils/errors';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
@@ -13,21 +13,38 @@ const ProductCard = ({ product }) => {
   const { isWishlisted, toggleWishlist } = useWishlist();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const [actionError, setActionError] = useState('');
   const price = Number(product.base_price || product.price || 0);
-  const saved = isWishlisted(product.id || product.product_id);
+  const productId = product.id || product.product_id;
+  const saved = isWishlisted(productId);
+  const slug = product.slug;
 
-  const handleWishlist = async () => {
+  const handleWishlist = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setActionError('');
     if (user?.role !== 'customer') {
       navigate('/login', { state: { notice: 'Sign in as a customer to save products.' } });
       return;
     }
     setSaving(true);
     try {
-      await toggleWishlist(product.id || product.product_id);
+      await toggleWishlist(productId);
     } catch (error) {
-      console.error('Wishlist update failed:', error);
+      setActionError(getErrorMessage(error, 'Could not update wishlist.'));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAdd = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setActionError('');
+    try {
+      addToCart(product, 1);
+    } catch (error) {
+      setActionError(getErrorMessage(error, 'Could not add to bag.'));
     }
   };
 
@@ -46,11 +63,14 @@ const ProductCard = ({ product }) => {
         >
           <Heart size={16} fill={saved ? 'currentColor' : 'none'} aria-hidden="true" />
         </button>
-        <Link to={`/product/${product.slug}`} aria-label={`View ${product.name}`}>
+        <Link to={slug ? `/product/${slug}` : '/products'} aria-label={`View ${product.name}`}>
           <img
             src={resolveImageUrl(product.primary_image || product.image_url)}
-            alt={product.name}
+            alt={product.name || 'Product'}
             loading="lazy"
+            onError={(e) => {
+              e.currentTarget.style.opacity = '0.4';
+            }}
           />
         </Link>
       </div>
@@ -65,9 +85,14 @@ const ProductCard = ({ product }) => {
             </span>
           ) : null}
         </div>
-        <Link to={`/product/${product.slug}`}>
+        <Link to={slug ? `/product/${slug}` : '/products'}>
           <h3>{product.name}</h3>
         </Link>
+        {actionError ? (
+          <p className="text-xs text-rose-600 mt-1" role="alert">
+            {actionError}
+          </p>
+        ) : null}
         <div className="product-card-footer">
           <div>
             <span className="price-label">From</span>
@@ -75,7 +100,7 @@ const ProductCard = ({ product }) => {
           </div>
           <button
             type="button"
-            onClick={() => addToCart(product, 1)}
+            onClick={handleAdd}
             className="product-add"
             aria-label={`Add ${product.name} to bag`}
           >

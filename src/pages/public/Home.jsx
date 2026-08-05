@@ -17,6 +17,8 @@ import CategoryGrid from '../../components/CategoryGrid';
 import ProductCard from '../../components/ProductCard';
 import VendorUpdatesFeed from '../../components/VendorUpdatesFeed';
 import { resolveImageUrl } from '../../utils/imageUrl';
+import { getErrorMessage } from '../../utils/errors';
+import ErrorAlert from '../../components/ErrorAlert';
 
 const searchIdeas = ['iPhone 15 Pro', 'gaming laptops', 'Nike shoes', 'wireless headphones'];
 
@@ -39,7 +41,7 @@ const Home = () => {
         }
       } catch (err) {
         console.error('Failed to fetch home products:', err);
-        setCatalogError('The live catalog is temporarily unavailable. Please try again shortly.');
+        setCatalogError(getErrorMessage(err, 'The live catalog is temporarily unavailable. Please try again shortly.'));
       } finally {
         setLoading(false);
       }
@@ -288,11 +290,15 @@ const Home = () => {
             ))}
           </div>
         ) : catalogError ? (
-          <div className="catalog-message">
-            <Sparkles size={24} aria-hidden="true" />
-            <p>More beautiful finds are on the way.</p>
-            <span>{catalogError}</span>
-            <Link to="/products">Browse the catalog</Link>
+          <div className="space-y-4">
+            <ErrorAlert
+              title="Catalog unavailable"
+              message={catalogError}
+              onRetry={() => window.location.reload()}
+            />
+            <div className="catalog-message">
+              <Link to="/products">Browse the catalog</Link>
+            </div>
           </div>
         ) : featuredProducts.length === 0 ? (
           <div className="catalog-message">

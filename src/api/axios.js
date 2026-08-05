@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../config/runtime';
+import { getErrorMessage } from '../utils/errors';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -12,10 +13,15 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch {
+      /* ignore storage errors */
     }
+
     if (config.data instanceof FormData) {
       if (config.headers?.['Content-Type']) {
         delete config.headers['Content-Type'];
@@ -31,15 +37,28 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      const path = window.location.pathname || '';
-      const isAuthPage = path.includes('/login') || path.includes('/register');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      if (!isAuthPage) {
-        window.location.href = '/login';
+    const status = error.response?.status;
+    const path = typeof window !== 'undefined' ? window.location.pathname || '' : '';
+    const isAuthPage =
+      path.includes('/login') ||
+      path.includes('/register') ||
+      path.includes('/forgot-password') ||
+      path.includes('/reset-password');
+
+    if (status === 401) {
+      try {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      } catch {
+        /* ignore */
+      }
+      if (typeof window !== 'undefined' && !isAuthPage) {
+        const returnTo = encodeURIComponent(path + (window.location.search || ''));
+        window.location.href = `/login?next=${returnTo}`;
       }
     }
+
+    error.userMessage = getErrorMessage(error);
     return Promise.reject(error);
   }
 );

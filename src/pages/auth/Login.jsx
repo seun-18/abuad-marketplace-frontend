@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
+import { getErrorMessage } from '../../utils/errors';
 
 const Login = () => {
   const { login } = useAuth();
@@ -45,7 +46,7 @@ const Login = () => {
       }
     } catch (err) {
       const data = err.response?.data;
-      const msg = data?.message || err.message || 'Invalid email or password.';
+      const msg = getErrorMessage(err, 'Invalid email or password.');
       setError(msg);
       if (data?.data?.requires_verification || /verify your email/i.test(msg)) {
         setNeedsVerify(true);
@@ -73,8 +74,7 @@ const Login = () => {
       }
     } catch (err) {
       setError(
-        err.response?.data?.message ||
-          'Could not send verification email. Brevo may still be misconfigured.'
+        getErrorMessage(err, 'Could not send verification email. Please try again.')
       );
     } finally {
       setResending(false);

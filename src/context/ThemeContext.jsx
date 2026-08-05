@@ -1,83 +1,47 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
+
+const STORAGE_KEY = 'abuad_theme';
 
 const ThemeContext = createContext({
-  theme: 'dark',
-  isDark: true,
+  theme: 'light',
+  isDark: false,
   toggleTheme: () => {},
   setTheme: () => {},
 });
 
-const STORAGE_KEY = 'abuad_theme';
-
-function getInitialTheme() {
-  if (typeof window === 'undefined') return 'dark';
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === 'light' || saved === 'dark') return saved;
-  } catch {
-    /* ignore */
-  }
-  if (window.matchMedia?.('(prefers-color-scheme: light)').matches) {
-    return 'light';
-  }
-  return 'dark';
-}
-
-function applyTheme(theme) {
+function applyLightTheme() {
   const root = document.documentElement;
-  root.setAttribute('data-theme', theme);
-  root.classList.toggle('dark', theme === 'dark');
-  root.classList.toggle('light', theme === 'light');
-  // Browser chrome (mobile address bar, etc.)
+  root.setAttribute('data-theme', 'light');
+  root.classList.remove('dark');
+  root.classList.add('light');
+  root.style.colorScheme = 'light';
+
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', theme === 'dark' ? '#000000' : '#f5f5f7');
+  if (meta) meta.setAttribute('content', '#f7f5f1');
+
   try {
-    localStorage.setItem(STORAGE_KEY, theme);
+    localStorage.setItem(STORAGE_KEY, 'light');
   } catch {
     /* ignore */
   }
 }
 
+/**
+ * Light-only theme. Dark mode is intentionally disabled.
+ */
 export const ThemeProvider = ({ children }) => {
-  const [theme, setThemeState] = useState(getInitialTheme);
-
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
-
-  // Sync if user changes OS preference and has no explicit choice stored yet
-  useEffect(() => {
-    const mq = window.matchMedia?.('(prefers-color-scheme: light)');
-    if (!mq) return undefined;
-    const onChange = (event) => {
-      try {
-        if (localStorage.getItem(STORAGE_KEY)) return;
-      } catch {
-        return;
-      }
-      setThemeState(event.matches ? 'light' : 'dark');
-    };
-    mq.addEventListener?.('change', onChange);
-    return () => mq.removeEventListener?.('change', onChange);
-  }, []);
-
-  const setTheme = useCallback((next) => {
-    if (next !== 'light' && next !== 'dark') return;
-    setThemeState(next);
-  }, []);
-
-  const toggleTheme = useCallback(() => {
-    setThemeState((current) => (current === 'dark' ? 'light' : 'dark'));
+    applyLightTheme();
   }, []);
 
   const value = useMemo(
     () => ({
-      theme,
-      isDark: theme === 'dark',
-      toggleTheme,
-      setTheme,
+      theme: 'light',
+      isDark: false,
+      toggleTheme: () => {},
+      setTheme: () => {},
     }),
-    [theme, toggleTheme, setTheme]
+    []
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

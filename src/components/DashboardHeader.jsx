@@ -1,6 +1,5 @@
 import { LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import ThemeToggle from './ThemeToggle';
 import NotificationBell from './NotificationBell';
 
 const DashboardHeader = () => {
@@ -22,8 +21,7 @@ const DashboardHeader = () => {
         <p className="dashboard-header-name">{displayName}</p>
       </div>
       <div className="flex items-center gap-2">
-        <ThemeToggle className="dashboard-header-button theme-toggle-dashboard" size={16} />
-        <NotificationBell />
+<NotificationBell />
         <div className="dashboard-avatar">{initials}</div>
         <button
           type="button"

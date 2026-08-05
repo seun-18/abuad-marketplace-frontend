@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../../api/axios';
 import ProductCard from '../../components/ProductCard';
+import { getErrorMessage } from '../../utils/errors';
+import ErrorAlert from '../../components/ErrorAlert';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -11,6 +13,8 @@ const Products = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
+  const [error, setError] = useState('');
+  const [reloadToken, setReloadToken] = useState(0);
 
   // Filter States initialized from URL params
   const [search, setSearch] = useState(searchParams.get('search') || '');
@@ -31,6 +35,7 @@ const Products = () => {
         }
       } catch (err) {
         console.error('Failed to load categories', err);
+        // non-blocking — filters still work without category list
       }
     };
     fetchCategories();
@@ -40,6 +45,7 @@ const Products = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
+      setError('');
       try {
         const params = new URLSearchParams();
         if (search) params.append('search', search);
@@ -56,6 +62,7 @@ const Products = () => {
 
         const res = await api.get(`/products/index.php?${params.toString()}`);
         if (res.data.success) {
+          setError('');
           setProducts(res.data.data?.products || []);
           if (res.data.data?.pagination) {
             setTotalPages(res.data.data.pagination.total_pages || 1);
@@ -63,13 +70,15 @@ const Products = () => {
         }
       } catch (err) {
         console.error('Failed to fetch filtered products', err);
+        setError(getErrorMessage(err, 'Could not load products. Please try again.'));
+        setProducts([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, [search, category, vendor, minPrice, maxPrice, sortBy, page]);
+  }, [search, category, vendor, minPrice, maxPrice, sortBy, page, reloadToken]);
 
   const handleResetFilters = () => {
     setSearch('');
@@ -183,6 +192,16 @@ const Products = () => {
             </select>
           </div>
         </div>
+
+        {error ? (
+          <div className="mb-6">
+            <ErrorAlert
+              title="Could not load products"
+              message={error}
+              onRetry={() => setReloadToken((n) => n + 1)}
+            />
+          </div>
+        ) : null}
 
         {/* Product Grid */}
         {loading ? (
