@@ -1,8 +1,6 @@
-import { Megaphone, Send, Trash2 } from 'lucide-react';
+import { Image, Megaphone, Send, Trash2, Upload } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
-import LocalImagePicker from '../../components/LocalImagePicker';
-import { resolveImageUrl } from '../../utils/imageUrl';
 
 const VendorUpdates = () => {
   const [updates, setUpdates] = useState([]);
@@ -32,22 +30,20 @@ const VendorUpdates = () => {
     loadUpdates();
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (imagePreview) URL.revokeObjectURL(imagePreview);
-    };
-  }, [imagePreview]);
-
-  const handleImage = (file) => {
-    if (imagePreview) URL.revokeObjectURL(imagePreview);
+  const onPickImage = (e) => {
+    const file = e.target.files?.[0];
     if (!file) {
       setImageFile(null);
       setImagePreview('');
       return;
     }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image must be 5 MB or smaller.');
+      return;
+    }
+    setError('');
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
-    setError('');
   };
 
   const publishUpdate = async (event) => {
@@ -67,23 +63,21 @@ const VendorUpdates = () => {
         const upload = await api.post('/vendors/upload_update_image.php', fd, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
-        if (!upload.data?.success) {
-          throw new Error(upload.data?.message || 'Image upload failed.');
-        }
         imageUrl = upload.data?.data?.url || '';
       }
       const response = await api.post('/vendors/updates.php', {
         body: body.trim(),
-        image_url: imageUrl || undefined,
+        image_url: imageUrl,
       });
       if (response.data.success) {
         setBody('');
-        handleImage(null);
-        setFeedback('Update is live for your followers.');
+        setImageFile(null);
+        setImagePreview('');
+        setFeedback('Your update is live for your followers.');
         await loadUpdates();
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Could not publish this update.');
+      setError(err.response?.data?.message || 'Could not publish this update.');
     } finally {
       setSubmitting(false);
     }
@@ -105,7 +99,7 @@ const VendorUpdates = () => {
           <p className="dashboard-kicker">Store community</p>
           <h1>Updates for your followers</h1>
           <p className="dashboard-lead">
-            Share arrivals, restocks, and pickup times. Attach a photo from your device.
+            Share new arrivals, restocks, and pickup times. Attach a photo from your device.
           </p>
         </div>
         <div className="dashboard-title-icon">
@@ -113,12 +107,12 @@ const VendorUpdates = () => {
         </div>
       </div>
 
-      {feedback && <div className="dashboard-alert">{feedback}</div>}
-      {error && <div className="dashboard-alert dashboard-alert-error">{error}</div>}
+      {feedback && <div className="auth-alert auth-alert-success">{feedback}</div>}
+      {error && <div className="auth-alert auth-alert-error">{error}</div>}
 
       <form onSubmit={publishUpdate} className="dashboard-panel space-y-4">
-        <label>
-          <span>Update</span>
+        <label className="block">
+          <span className="text-xs font-semibold opacity-60">Update text</span>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
@@ -126,18 +120,28 @@ const VendorUpdates = () => {
             required
             maxLength={1000}
             placeholder="e.g. Fresh stock of notebooks available for hostel pickup today…"
+            className="mt-1 w-full"
           />
         </label>
 
-        <LocalImagePicker
-          label="Photo (optional)"
-          hint="From camera or gallery · max 5 MB"
-          file={imageFile}
-          previewUrl={imagePreview}
-          onChange={handleImage}
-        />
+        <label className="local-image-upload">
+          <span className="text-xs font-semibold opacity-60">Photo from your device (optional)</span>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            onChange={onPickImage}
+          />
+          {imagePreview ? (
+            <img src={imagePreview} alt="Preview" className="local-upload-preview" />
+          ) : (
+            <span className="local-upload-empty">
+              <Upload size={18} /> Tap to choose image from gallery / files
+            </span>
+          )}
+          {imageFile && <small className="local-upload-file">{imageFile.name}</small>}
+        </label>
 
-        <button type="submit" disabled={submitting} className="dashboard-action-button">
+        <button type="submit" disabled={submitting} className="chat-start-btn inline-flex items-center gap-2">
           <Send size={16} />
           {submitting ? 'Publishing…' : 'Publish update'}
         </button>
@@ -155,7 +159,7 @@ const VendorUpdates = () => {
               <p>{update.body}</p>
               {update.image_url && (
                 <img
-                  src={resolveImageUrl(update.image_url)}
+                  src={update.image_url}
                   alt=""
                   className="max-h-56 w-full rounded-xl object-cover"
                 />

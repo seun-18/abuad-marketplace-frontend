@@ -1,22 +1,22 @@
 /* ========== LIGHT MODE: white text → black/gray hierarchy ========== */
 
 html[data-theme='light'] {
-  --text: #1d1d1f;
-  --text-muted: rgba(29, 29, 31, 0.58);
-  --text-faint: rgba(29, 29, 31, 0.42);
-  --surface: #f4f4f6;
+  --text: #141310;
+  --text-muted: rgba(20, 19, 16, 0.58);
+  --text-faint: rgba(20, 19, 16, 0.4);
+  --surface: #f7f5f1;
   --surface-elevated: #ffffff;
-  --border: rgba(0, 0, 0, 0.08);
+  --border: rgba(20, 19, 16, 0.08);
   color-scheme: light;
 }
 
 html[data-theme='dark'] {
-  --text: #f5f5f7;
-  --text-muted: rgba(255, 255, 255, 0.58);
-  --text-faint: rgba(255, 255, 255, 0.4);
-  --surface: #000000;
-  --surface-elevated: #0a0a0a;
-  --border: rgba(255, 255, 255, 0.1);
+  --text: #f2efe9;
+  --text-muted: rgba(242, 239, 233, 0.62);
+  --text-faint: rgba(242, 239, 233, 0.4);
+  --surface: #0e0d0b;
+  --surface-elevated: #161512;
+  --border: rgba(242, 239, 233, 0.09);
   color-scheme: dark;
 }
 
@@ -24,12 +24,11 @@ html[data-theme='dark'] {
 html[data-theme='light'] body,
 html[data-theme='light'] #root,
 html[data-theme='light'] .dashboard-shell,
-html[data-theme='light'] .dashboard-shell *,
 html[data-theme='light'] .premium-dashboard-page,
 html[data-theme='light'] .home-layout,
 html[data-theme='light'] .market-dark,
 html[data-theme='light'] .auth-page {
-  color: #1d1d1f;
+  color: #141310;
 }
 
 html[data-theme='light'] h1,
@@ -42,7 +41,7 @@ html[data-theme='light'] .dashboard-shell h2,
 html[data-theme='light'] .dashboard-shell h3,
 html[data-theme='light'] .premium-dashboard-page h1,
 html[data-theme='light'] .premium-dashboard-page h2 {
-  color: #0a0a0a !important;
+  color: #141310 !important;
 }
 
 html[data-theme='light'] p,
@@ -57,7 +56,7 @@ html[data-theme='light'] .text-white,
 html[data-theme='light'] .text-gray-100,
 html[data-theme='light'] .text-gray-200,
 html[data-theme='light'] .text-gray-300 {
-  color: #1d1d1f !important;
+  color: #141310 !important;
 }
 
 html[data-theme='light'] .opacity-50,

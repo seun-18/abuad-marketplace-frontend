@@ -17,7 +17,7 @@ const Footer = () => {
               </span>
             </Link>
             <p className="footer-intro">
-              A more beautiful way to discover, connect, and shop around campus.
+              A calm campus marketplace—discover, connect, and shop with people around you.
             </p>
             <div className="footer-socials">
               <a href="#" aria-label="Instagram">
@@ -51,9 +51,9 @@ const Footer = () => {
             <div className="newsletter-icon">
               <Mail size={18} />
             </div>
-            <p>THE WEEKLY EDIT</p>
-            <h3>Good finds, delivered.</h3>
-            <span>Curated drops and campus favorites, once a week.</span>
+            <p>Weekly note</p>
+            <h3>Quiet finds, weekly.</h3>
+            <span>Campus favorites and new drops—once a week.</span>
             <form onSubmit={(event) => event.preventDefault()}>
               <input type="email" placeholder="Your email address" aria-label="Email address" />
               <button type="submit" aria-label="Join newsletter">
