@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
 import { getErrorMessage } from '../../utils/errors';
@@ -22,6 +22,7 @@ const Login = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
@@ -73,9 +74,7 @@ const Login = () => {
         setNeedsVerify(false);
       }
     } catch (err) {
-      setError(
-        getErrorMessage(err, 'Could not send verification email. Please try again.')
-      );
+      setError(getErrorMessage(err, 'Could not send verification email. Please try again.'));
     } finally {
       setResending(false);
     }
@@ -83,90 +82,113 @@ const Login = () => {
 
   return (
     <div className="auth-page">
-      <div className="auth-card">
-        <p className="eyebrow" style={{ color: '#ffb703', marginBottom: '0.75rem' }}>
-          ABUAD Market Place
-        </p>
-        <h1>Welcome back</h1>
-        <p className="auth-subtitle">
-          Sign in to shop campus finds, manage your store, or continue where you left off.
-        </p>
+      <div className="auth-wrap">
+        <div className="auth-brand-bar">
+          <Link to="/" className="auth-brand-link" aria-label="Back to home">
+            <span className="auth-brand-mark">A</span>
+            <span>
+              ABUAD <em>Market</em>
+            </span>
+          </Link>
+        </div>
 
-        {notice && <div className="auth-alert auth-alert-success">{notice}</div>}
-        {info && <div className="auth-alert auth-alert-success">{info}</div>}
-        {error && <div className="auth-alert auth-alert-error">{error}</div>}
-
-        {needsVerify && (
-          <div className="auth-alert" style={{ borderColor: 'rgba(255,183,3,0.35)' }}>
-            <p style={{ margin: '0 0 0.5rem' }}>
-              Your account exists but the email was never verified (the first email likely never sent).
+        <div className="auth-card">
+          <header className="auth-card-head">
+            <p className="auth-kicker">Welcome back</p>
+            <h1>Sign in</h1>
+            <p className="auth-subtitle">
+              Shop campus deals, chat with sellers, or manage your store.
             </p>
-            <button
-              type="button"
-              className="auth-submit"
-              style={{ marginTop: '0.25rem' }}
-              disabled={resending}
-              onClick={resendVerification}
-            >
-              {resending ? 'Sending…' : 'Resend verification email'}
-            </button>
-          </div>
-        )}
+          </header>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email">Email address</label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              name="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="you@example.com"
-            />
-          </div>
+          {notice ? <div className="auth-alert auth-alert-success">{notice}</div> : null}
+          {info ? <div className="auth-alert auth-alert-success">{info}</div> : null}
+          {error ? <div className="auth-alert auth-alert-error">{error}</div> : null}
 
-          <div>
-            <label htmlFor="password">Password</label>
-            <div className="auth-password-field">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
-                name="password"
-                required
-                minLength={8}
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-              />
+          {needsVerify ? (
+            <div className="auth-alert auth-alert-warn">
+              <p>Your account exists but email is not verified yet.</p>
               <button
                 type="button"
-                className="auth-password-toggle"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="auth-secondary-btn"
+                disabled={resending}
+                onClick={resendVerification}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {resending ? 'Sending…' : 'Resend verification email'}
               </button>
             </div>
+          ) : null}
+
+          <form onSubmit={handleSubmit} className="auth-form" noValidate>
+            <div className="auth-field">
+              <label htmlFor="email">Email address</label>
+              <div className="auth-input-wrap">
+                <Mail size={17} aria-hidden="true" />
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  name="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                />
+              </div>
+            </div>
+
+            <div className="auth-field">
+              <div className="auth-label-row">
+                <label htmlFor="password">Password</label>
+                <Link to="/forgot-password" className="auth-forgot-link">
+                  Forgot password?
+                </Link>
+              </div>
+              <div className="auth-input-wrap auth-password-field">
+                <Lock size={17} aria-hidden="true" />
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  name="password"
+                  required
+                  minLength={8}
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Your password"
+                />
+                <button
+                  type="button"
+                  className="auth-password-toggle"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" disabled={submitting} className="auth-submit">
+              {submitting ? (
+                'Signing in…'
+              ) : (
+                <>
+                  Sign in
+                  <ArrowRight size={17} aria-hidden="true" />
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="auth-trust">
+            <ShieldCheck size={15} aria-hidden="true" />
+            <span>Secure login · Your data stays private</span>
           </div>
 
-          <div className="auth-forgot-row">
-            <Link to="/forgot-password" className="auth-forgot-link">
-              Forgot password?
-            </Link>
-          </div>
-
-          <button type="submit" disabled={submitting} className="auth-submit">
-            {submitting ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
-
-        <p className="auth-footer">
-          New here? <Link to="/register">Create an account</Link>
-        </p>
+          <p className="auth-footer">
+            New here? <Link to="/register">Create an account</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

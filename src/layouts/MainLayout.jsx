@@ -13,7 +13,7 @@ const MainLayout = () => {
         className={
           isHome
             ? 'w-full flex-grow'
-            : 'mx-auto w-full max-w-[1180px] flex-grow px-3 py-4 sm:px-4 sm:py-6'
+            : 'mx-auto w-full max-w-[1180px] flex-grow px-3 py-3 sm:px-4 sm:py-5'
         }
       >
         <Outlet />
