@@ -1,5 +1,5 @@
 import { Image, Layers3, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { resolveImageUrl } from '../../utils/imageUrl';
 
@@ -10,18 +10,8 @@ const emptyForm = {
   image_url: '',
 };
 
-// The API nests subcategories inside each top-level category's
-// `subcategories` array. Flatten it so subcategories show up in the
-// catalog list and aren't invisible to admins managing the taxonomy.
-const flattenCategories = (tree) =>
-  tree.flatMap((parent) => [
-    { ...parent, depth: 0 },
-    ...(parent.subcategories || []).map((sub) => ({ ...sub, depth: 1 })),
-  ]);
-
 const AdminCategories = () => {
-  const [categoryTree, setCategoryTree] = useState([]);
-  const categories = useMemo(() => flattenCategories(categoryTree), [categoryTree]);
+  const [categories, setCategories] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -31,7 +21,7 @@ const AdminCategories = () => {
   const fetchCategories = async () => {
     try {
       const response = await api.get('/categories/index.php');
-      if (response.data.success) setCategoryTree(response.data.data || []);
+      if (response.data.success) setCategories(response.data.data || []);
     } catch (requestError) {
       setError(requestError.response?.data?.message || 'Could not load categories.');
     } finally {
@@ -124,13 +114,11 @@ const AdminCategories = () => {
               }
             >
               <option value="">Top-level category</option>
-              {categories
-                .filter((category) => category.depth === 0)
-                .map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
             </select>
           </label>
           <label>
@@ -176,13 +164,10 @@ const AdminCategories = () => {
           ) : (
             <div className="admin-category-list">
               {categories.map((category) => (
-                <article key={category.id} style={category.depth ? { paddingLeft: '1.5rem' } : undefined}>
+                <article key={category.id}>
                   <img src={resolveImageUrl(category.category_image)} alt="" />
                   <div>
-                    <p>
-                      {category.depth ? '↳ ' : ''}
-                      {category.name}
-                    </p>
+                    <p>{category.name}</p>
                     <span>
                       {Number(category.product_count || 0).toLocaleString()} products ·{' '}
                       {Number(category.units_sold || 0).toLocaleString()} sales

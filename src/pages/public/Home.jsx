@@ -186,19 +186,11 @@ const Home = () => {
               </div>
             </div>
             <div className="jumia-video-card">
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
-                poster={trustCommunityImage}
-                aria-label="Campus marketplace highlight"
-              >
-                <source
-                  src="https://cdn.coverr.co/videos/coverr-shopping-in-a-mall-5634/1080p.mp4"
-                  type="video/mp4"
-                />
-              </video>
+              <img
+                src={trustCommunityImage}
+                alt="Students discovering products at ABUAD Market Place"
+                loading="lazy"
+              />
               <div className="jumia-video-label">
                 <Zap size={14} />
                 Live campus market

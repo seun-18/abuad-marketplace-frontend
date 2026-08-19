@@ -1,7 +1,6 @@
 import { Heart, Menu, Search, ShoppingBag, UserRound, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
@@ -15,32 +14,12 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [search, setSearch] = useState('');
-  const [topCategories, setTopCategories] = useState([]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  // Populate the "Categories" popover with real categories instead of
-  // guessed slugs, so the links actually resolve to filtered results.
-  useEffect(() => {
-    let cancelled = false;
-    api
-      .get('/categories/index.php')
-      .then((res) => {
-        if (!cancelled && res.data.success) {
-          setTopCategories((res.data.data || []).slice(0, 4));
-        }
-      })
-      .catch(() => {
-        /* non-blocking — the "Shop" link still covers browsing all categories */
-      });
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   useEffect(() => setMenuOpen(false), [location.pathname]);
@@ -86,17 +65,18 @@ const Navbar = () => {
             </Link>
             <div className="category-popover">
               <p>Explore collections</p>
-              {topCategories.length > 0 ? (
-                topCategories.map((cat) => (
-                  <Link key={cat.id} to={`/products?category=${encodeURIComponent(cat.slug)}`}>
-                    {cat.name} <span>→</span>
-                  </Link>
-                ))
-              ) : (
-                <Link to="/products">
-                  Browse all <span>→</span>
-                </Link>
-              )}
+              <Link to="/products?category=electronics">
+                Electronics <span>→</span>
+              </Link>
+              <Link to="/products?category=fashion">
+                Fashion <span>→</span>
+              </Link>
+              <Link to="/products?category=books">
+                Books & study <span>→</span>
+              </Link>
+              <Link to="/products?category=home">
+                Home & living <span>→</span>
+              </Link>
             </div>
           </div>
           {user?.role === 'customer' && (
