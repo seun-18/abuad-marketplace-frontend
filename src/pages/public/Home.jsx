@@ -8,7 +8,7 @@ import {
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
-import trustCommunityImage from '../../assets/abuad-trust-community.jpg';
+import trustCommunityImage from '../../assets/campus-hero.jpg';
 import ProductCard from '../../components/ProductCard';
 import CategoryBar from '../../components/filters/CategoryBar';
 import EscrowBanner from '../../components/trust/EscrowBanner';

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Phone, ArrowRight } from 'lucide-react';
 import api from '../../api/axios';
+import { getErrorMessage } from '../../utils/errors';
 
 const VerifyPhone = () => {
   const location = useLocation();
@@ -10,7 +12,7 @@ const VerifyPhone = () => {
 
   const [phone, setPhone] = useState(presetPhone);
   const [code, setCode] = useState('');
-  const [step, setStep] = useState(presetPhone ? 'code' : 'phone'); // phone | code
+  const [step, setStep] = useState(presetPhone ? 'code' : 'phone');
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [message, setMessage] = useState('');
@@ -31,7 +33,7 @@ const VerifyPhone = () => {
       setMessage(res.data?.message || 'Code sent.');
       setStep('code');
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not send SMS.');
+      setError(getErrorMessage(err, 'Could not send SMS.'));
     } finally {
       setSending(false);
     }
@@ -49,9 +51,16 @@ const VerifyPhone = () => {
         user_id: userId,
       });
       setMessage(res.data?.message || 'Phone verified.');
-      setTimeout(() => navigate('/login', { replace: true, state: { notice: 'Phone verified. You can sign in.' } }), 1000);
+      setTimeout(
+        () =>
+          navigate('/login', {
+            replace: true,
+            state: { notice: 'Phone verified. You can sign in.' },
+          }),
+        1000
+      );
     } catch (err) {
-      setError(err.response?.data?.message || 'Verification failed.');
+      setError(getErrorMessage(err, 'Verification failed.'));
     } finally {
       setVerifying(false);
     }
@@ -59,73 +68,102 @@ const VerifyPhone = () => {
 
   return (
     <div className="auth-page">
-      <div className="auth-card">
-        <p className="eyebrow" style={{ color: '#ffb703', marginBottom: '0.75rem' }}>
-          ABUAD Market Place
-        </p>
-        <h1>Verify phone</h1>
-        <p className="auth-subtitle">
-          We will send a 6-digit code by SMS to confirm your number.
-        </p>
+      <div className="auth-wrap">
+        <div className="auth-brand-bar">
+          <Link to="/" className="auth-brand-link" aria-label="Back to home">
+            <span className="auth-brand-mark">A</span>
+            <span>
+              ABUAD <em>Market</em>
+            </span>
+          </Link>
+        </div>
 
-        {message && <div className="auth-alert auth-alert-success">{message}</div>}
-        {error && <div className="auth-alert auth-alert-error">{error}</div>}
-
-        {step === 'phone' ? (
-          <form onSubmit={sendOtp} className="space-y-4">
-            <div>
-              <label htmlFor="sms_phone">Phone number</label>
-              <input
-                id="sms_phone"
-                type="tel"
-                required
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="0803 000 0000"
-                autoComplete="tel"
-              />
-            </div>
-            <button type="submit" disabled={sending} className="auth-submit">
-              {sending ? 'Sending…' : 'Send code'}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={verifyOtp} className="space-y-4">
-            <p className="auth-subtitle" style={{ marginBottom: 0 }}>
-              Code sent{hint ? ` to ${hint}` : ''}.
+        <div className="auth-card">
+          <header className="auth-card-head">
+            <p className="auth-kicker">Phone verification</p>
+            <h1>Verify phone</h1>
+            <p className="auth-subtitle">
+              We will send a 6-digit code by SMS to confirm your number.
             </p>
-            <div>
-              <label htmlFor="sms_code">6-digit code</label>
-              <input
-                id="sms_code"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]{6}"
-                maxLength={6}
-                required
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="••••••"
-                autoComplete="one-time-code"
-              />
-            </div>
-            <button type="submit" disabled={verifying || code.length !== 6} className="auth-submit">
-              {verifying ? 'Verifying…' : 'Verify phone'}
-            </button>
-            <button
-              type="button"
-              className="auth-secondary-btn"
-              disabled={sending}
-              onClick={sendOtp}
-            >
-              {sending ? 'Resending…' : 'Resend code'}
-            </button>
-          </form>
-        )}
+          </header>
 
-        <p className="auth-footer">
-          <Link to="/login">Back to sign in</Link>
-        </p>
+          {message ? <div className="auth-alert auth-alert-success">{message}</div> : null}
+          {error ? <div className="auth-alert auth-alert-error">{error}</div> : null}
+
+          {step === 'phone' ? (
+            <form onSubmit={sendOtp} className="auth-form" noValidate>
+              <div className="auth-field">
+                <label htmlFor="sms_phone">Phone number</label>
+                <div className="auth-input-wrap">
+                  <Phone size={17} aria-hidden="true" />
+                  <input
+                    id="sms_phone"
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="0803 000 0000"
+                    autoComplete="tel"
+                  />
+                </div>
+              </div>
+              <button type="submit" disabled={sending} className="auth-submit">
+                {sending ? (
+                  'Sending…'
+                ) : (
+                  <>
+                    Send code
+                    <ArrowRight size={17} aria-hidden="true" />
+                  </>
+                )}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={verifyOtp} className="auth-form" noValidate>
+              <p className="auth-subtitle" style={{ marginBottom: 0 }}>
+                Code sent{hint ? ` to ${hint}` : ''}.
+              </p>
+              <div className="auth-field">
+                <label htmlFor="sms_code">6-digit code</label>
+                <div className="auth-input-wrap">
+                  <input
+                    id="sms_code"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    required
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="••••••"
+                    autoComplete="one-time-code"
+                    style={{ textAlign: 'center', letterSpacing: '0.25em', fontWeight: 600 }}
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={verifying || code.length !== 6}
+                className="auth-submit"
+              >
+                {verifying ? 'Verifying…' : 'Verify phone'}
+              </button>
+              <button
+                type="button"
+                className="auth-secondary-btn"
+                disabled={sending}
+                onClick={sendOtp}
+                style={{ alignSelf: 'center', color: 'var(--primary)' }}
+              >
+                {sending ? 'Resending…' : 'Resend code'}
+              </button>
+            </form>
+          )}
+
+          <p className="auth-footer">
+            <Link to="/login">Back to sign in</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

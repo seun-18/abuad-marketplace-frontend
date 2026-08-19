@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Eye,
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getErrorMessage } from '../../utils/errors';
+import campusStudents from '../../assets/campus-students.jpg';
 
 const Register = () => {
   const { register } = useAuth();
@@ -63,7 +64,11 @@ const Register = () => {
       setError('Password must be at least 8 characters long.');
       return;
     }
-    if (formData.role === 'vendor' && formData.shop_name.trim() && formData.shop_name.trim().length < 2) {
+    if (
+      formData.role === 'vendor' &&
+      formData.shop_name.trim() &&
+      formData.shop_name.trim().length < 2
+    ) {
       setError('Shop name must be at least 2 characters.');
       return;
     }
@@ -94,7 +99,7 @@ const Register = () => {
   };
 
   return (
-    <div className="auth-page">
+    <div className="auth-page auth-page-split">
       <div className="auth-wrap auth-wrap-wide">
         <div className="auth-brand-bar">
           <Link to="/" className="auth-brand-link" aria-label="Back to home">
@@ -110,7 +115,8 @@ const Register = () => {
             <p className="auth-kicker">Join ABUAD Market</p>
             <h1>Create account</h1>
             <p className="auth-subtitle">
-              Shop as a customer or open a campus store. Vendors need a quick admin review before going live.
+              Shop as a customer or open a campus store. Vendors need a quick admin review
+              before going live.
             </p>
           </header>
 
@@ -228,7 +234,9 @@ const Register = () => {
                     placeholder={`${formData.first_name || 'Your'}'s Shop`}
                   />
                 </div>
-                <p className="auth-field-hint">Optional — new stores need admin approval before going live.</p>
+                <p className="auth-field-hint">
+                  Optional — new stores need admin approval before going live.
+                </p>
               </div>
             ) : null}
 
@@ -310,6 +318,14 @@ const Register = () => {
           </p>
         </div>
       </div>
+
+      <aside className="auth-side-visual" aria-hidden="true">
+        <img src={campusStudents} alt="" />
+        <div className="auth-side-visual-content">
+          <h2>Join thousands of ABUAD students</h2>
+          <p>Buy textbooks, gadgets, and more — or open your own campus store in minutes.</p>
+        </div>
+      </aside>
     </div>
   );
 };

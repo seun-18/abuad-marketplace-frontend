@@ -21,16 +21,11 @@ const Cart = () => {
 
   if (cart.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto py-16 text-center bg-white rounded-2xl border border-gray-100 shadow-sm">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Your Cart is Empty</h2>
-        <p className="text-gray-500 mb-6">
-          Looks like you haven't added any products to your cart yet.
-        </p>
-        <Link
-          to="/products"
-          className="inline-block px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition"
-        >
-          Explore Catalog
+      <div className="cart-empty">
+        <h2>Your bag is empty</h2>
+        <p>Looks like you haven&apos;t added any campus finds yet.</p>
+        <Link to="/products" className="btn btn-primary">
+          Explore catalog
         </Link>
       </div>
     );

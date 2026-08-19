@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
 import { getErrorMessage } from '../../utils/errors';
+import authSideImage from '../../assets/auth-side.jpg';
 
 const Login = () => {
   const { login } = useAuth();
@@ -34,7 +35,6 @@ const Login = () => {
 
     try {
       const user = await login(formData);
-
       switch (user.role) {
         case 'super_admin':
           navigate('/admin/dashboard', { replace: true });
@@ -81,7 +81,7 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-page">
+    <div className="auth-page auth-page-split">
       <div className="auth-wrap">
         <div className="auth-brand-bar">
           <Link to="/" className="auth-brand-link" aria-label="Back to home">
@@ -190,6 +190,16 @@ const Login = () => {
           </p>
         </div>
       </div>
+
+      <aside className="auth-side-visual" aria-hidden="true">
+        <img src={authSideImage} alt="" />
+        <div className="auth-side-visual-content">
+          <h2>Campus trading, made simple</h2>
+          <p>
+            Meet at Salami Hall, Motion Ground, or Main Gate. Secure escrow on every deal.
+          </p>
+        </div>
+      </aside>
     </div>
   );
 };
