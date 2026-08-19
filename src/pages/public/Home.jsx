@@ -1,7 +1,6 @@
 import {
   ArrowRight,
   BadgeCheck,
-  ChevronDown,
   MessageCircleMore,
   Search,
   ShieldCheck,
@@ -110,152 +109,123 @@ const Home = () => {
 
   return (
     <div className="home-shell">
-      <section className="hero-stage">
-        <div className="hero-orbit hero-orbit-one" />
-        <div className="hero-orbit hero-orbit-two" />
-        <div className="hero-noise" />
-        <div className="hero-grid" />
-
-        <div className="hero-inner">
-          <div className="hero-copy">
-            <div className="hero-kicker">
-              <span className="hero-kicker-dot" aria-hidden="true" />
-              ABUAD campus market
-            </div>
-            <h1>
-              Shop campus.
-              <span>Simple and trusted.</span>
-            </h1>
-            <p>
-              Essentials, rare pieces, and trusted sellers—all in one calm marketplace built for
-              life around ABUAD.
-            </p>
-
-            <form onSubmit={handleSearch} className="hero-search" role="search">
-              <Search size={19} aria-hidden="true" />
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={typedPlaceholder || 'Search the marketplace…'}
-                aria-label="Search the marketplace"
-              />
-              <button type="submit" aria-label="Submit search">
-                <ArrowRight size={18} aria-hidden="true" />
-              </button>
-            </form>
-
-            <div className="hero-actions">
-              <Link to="/products" className="button-gold">
-                Explore the marketplace
-                <ArrowRight size={17} aria-hidden="true" />
-              </Link>
-              <Link to="/register" className="button-ghost">
-                Become a seller
-              </Link>
-            </div>
-
-            <div className="hero-proof">
-              <div className="proof-avatars" aria-hidden="true">
-                <span>AO</span>
-                <span>TM</span>
-                <span>KI</span>
-              </div>
-              <div>
-                <div className="proof-stars">
-                  {[0, 1, 2, 3, 4].map((star) => (
-                    <Star key={star} size={12} fill="currentColor" aria-hidden="true" />
-                  ))}
-                </div>
-                <p>Trusted by campus shoppers</p>
+      <section className="jumia-hero">
+        <div className="jumia-hero-grid">
+          <div className="jumia-banner">
+            <img
+              className="jumia-banner-img"
+              src={trustCommunityImage}
+              alt="ABUAD Market Place campus shopping"
+            />
+            <div className="jumia-banner-overlay">
+              <p className="jumia-banner-kicker">Campus deals</p>
+              <h1>Shop everything on campus</h1>
+              <p>Phones, fashion, books, essentials — from verified ABUAD sellers.</p>
+              <form onSubmit={handleSearch} className="jumia-search" role="search">
+                <Search size={18} aria-hidden="true" />
+                <input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder={typedPlaceholder || 'Search products, brands and shops'}
+                  aria-label="Search the marketplace"
+                />
+                <button type="submit">Search</button>
+              </form>
+              <div className="jumia-banner-actions">
+                <Link to="/products" className="jumia-btn-primary">
+                  Shop now
+                </Link>
+                <Link to="/register" className="jumia-btn-outline">
+                  Sell on ABUAD
+                </Link>
               </div>
             </div>
           </div>
 
-          <div className="hero-visual" aria-label="Featured marketplace products">
-            <div className="visual-halo" />
-            <div className="visual-ring visual-ring-one" />
-            <div className="visual-ring visual-ring-two" />
-            <div className="floating-chip chip-top">
-              <Zap size={14} fill="currentColor" aria-hidden="true" />
-              Trending now
-            </div>
-            <div className="floating-chip chip-bottom">
-              <span className="live-dot" />
-              2.4k shoppers online
-            </div>
-
-            <div className="hero-product hero-product-main">
-              <span className="hero-product-label">Editor&apos;s pick</span>
-              <div className="hero-product-image">
-                <img
-                  src={resolveImageUrl(
-                    heroProducts[0]?.primary_image || heroProducts[0]?.image_url
-                  )}
-                  alt={heroProducts[0]?.name || 'Featured marketplace product'}
-                />
-              </div>
-              <div className="hero-product-info">
-                <div>
-                  <p>{heroProducts[0]?.brand || 'Featured today'}</p>
-                  <h2>{heroProducts[0]?.name || 'Your next favorite find'}</h2>
-                </div>
-                <span>
+          <div className="jumia-hero-side">
+            <div className="jumia-promo-card">
+              <img
+                src={resolveImageUrl(
+                  heroProducts[0]?.primary_image || heroProducts[0]?.image_url
+                )}
+                alt={heroProducts[0]?.name || 'Featured product'}
+                onError={(e) => {
+                  e.currentTarget.src = trustCommunityImage;
+                }}
+              />
+              <div>
+                <span>Top pick</span>
+                <strong>{heroProducts[0]?.name || 'Featured today'}</strong>
+                <p>
                   ₦
                   {Number(
-                    heroProducts[0]?.base_price || heroProducts[0]?.price || 24900
+                    heroProducts[0]?.base_price || heroProducts[0]?.price || 0
                   ).toLocaleString()}
-                </span>
+                </p>
               </div>
             </div>
-
-            <div className="hero-product hero-product-side side-left">
-              <div className="hero-product-image">
-                <img
-                  src={resolveImageUrl(
-                    heroProducts[1]?.primary_image || heroProducts[1]?.image_url
-                  )}
-                  alt={heroProducts[1]?.name || 'New marketplace arrival'}
-                />
+            <div className="jumia-promo-card">
+              <img
+                src={resolveImageUrl(
+                  heroProducts[1]?.primary_image || heroProducts[1]?.image_url
+                )}
+                alt={heroProducts[1]?.name || 'New arrival'}
+                onError={(e) => {
+                  e.currentTarget.src = trustCommunityImage;
+                }}
+              />
+              <div>
+                <span>New</span>
+                <strong>{heroProducts[1]?.name || 'New arrival'}</strong>
+                <p>
+                  ₦
+                  {Number(
+                    heroProducts[1]?.base_price || heroProducts[1]?.price || 0
+                  ).toLocaleString()}
+                </p>
               </div>
-              <p>{heroProducts[1]?.name || 'New arrival'}</p>
             </div>
-
-            <div className="hero-product hero-product-side side-right">
-              <div className="hero-product-image">
-                <img
-                  src={resolveImageUrl(
-                    heroProducts[2]?.primary_image || heroProducts[2]?.image_url
-                  )}
-                  alt={heroProducts[2]?.name || 'Popular marketplace product'}
+            <div className="jumia-video-card">
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster={trustCommunityImage}
+                aria-label="Campus marketplace highlight"
+              >
+                <source
+                  src="https://cdn.coverr.co/videos/coverr-shopping-in-a-mall-5634/1080p.mp4"
+                  type="video/mp4"
                 />
+              </video>
+              <div className="jumia-video-label">
+                <Zap size={14} />
+                Live campus market
               </div>
-              <p>{heroProducts[2]?.name || 'Campus favorite'}</p>
             </div>
           </div>
         </div>
 
-        <a className="scroll-cue" href="#categories" aria-label="Scroll to categories">
-          <span>Discover more</span>
-          <ChevronDown size={16} aria-hidden="true" />
-        </a>
-      </section>
-
-      <div className="marquee" aria-hidden="true">
-        <div className="marquee-track">
-          {[0, 1].map((group) => (
-            <div className="marquee-group" key={group}>
-              <span>Verified sellers</span>
-              <Sparkles size={14} />
-              <span>Curated finds</span>
-              <Sparkles size={14} />
-              <span>Secure checkout</span>
-              <Sparkles size={14} />
-              <span>Delivered around you</span>
-              <Sparkles size={14} />
-            </div>
-          ))}
+        <div className="jumia-trust-row">
+          <div>
+            <ShieldCheck size={18} />
+            <span>Secure Paystack checkout</span>
+          </div>
+          <div>
+            <BadgeCheck size={18} />
+            <span>Verified campus sellers</span>
+          </div>
+          <div>
+            <MessageCircleMore size={18} />
+            <span>Chat with shops</span>
+          </div>
+          <div>
+            <Star size={18} />
+            <span>Trusted by students</span>
+          </div>
         </div>
-      </div>
+      </section>
 
       <section id="categories" className="home-section category-section">
         <div className="section-glow section-glow-gold" />
@@ -267,9 +237,9 @@ const Home = () => {
           <div>
             <p className="luxury-eyebrow">
               <span />
-              Fresh picks
+              Top deals
             </p>
-            <h2>Selected for campus life.</h2>
+            <h2>Recommended for you</h2>
           </div>
           <Link to="/products" className="text-link-gold">
             Shop all products

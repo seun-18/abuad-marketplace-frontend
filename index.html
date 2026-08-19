@@ -1,16 +1,34 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light" class="light">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta
       name="description"
-      content="ABUAD Market Place — secure pickup, delivery, and shopping for the ABUAD community"
+      content="ABUAD Market Place — shop campus deals from verified sellers"
     />
-    <meta name="theme-color" content="#050505" />
+    <meta name="theme-color" content="#f8f8f8" />
+    <meta name="color-scheme" content="light" />
+    <script>
+      (function () {
+        try {
+          var root = document.documentElement;
+          root.setAttribute('data-theme', 'light');
+          root.classList.remove('dark');
+          root.classList.add('light');
+          try { localStorage.setItem('abuad_theme', 'light'); } catch (e) {}
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <title>ABUAD Market Place</title>
   </head>
-  <body class="bg-gray-50">
+  <body class="antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

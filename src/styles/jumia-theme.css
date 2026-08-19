@@ -1,0 +1,916 @@
+/**
+ * ABUAD Market Place — Jumia-inspired marketplace theme
+ * One consistent light background, orange accent, fine Inter typography.
+ */
+
+:root,
+html,
+html[data-theme='light'],
+html[data-theme='dark'],
+html.light,
+html.dark,
+body,
+#root {
+  --bg: #f8f8f8 !important;
+  --bg-elevated: #ffffff !important;
+  --bg-card: #ffffff !important;
+  --bg-soft: #f0f0f0 !important;
+  --text: #282828 !important;
+  --text-muted: #6c6c6c !important;
+  --text-faint: #9b9b9b !important;
+  --border: #ededed !important;
+  --border-strong: #e0e0e0 !important;
+  --gold: #f68b1e !important;
+  --gold-soft: #ff9f2e !important;
+  --gold-dim: rgba(246, 139, 30, 0.12) !important;
+  --orange: #f68b1e !important;
+  --orange-dark: #e07b10 !important;
+  --danger: #e53935 !important;
+  --success: #43a047 !important;
+  --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --shadow-soft: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.05);
+  color-scheme: light !important;
+  background: #f8f8f8 !important;
+  color: #282828 !important;
+}
+
+html,
+body,
+#root {
+  background: #f8f8f8 !important;
+  color: #282828 !important;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.01em !important;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
+  color: #282828 !important;
+}
+
+button, input, select, textarea {
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+/* Force ONE background on every shell */
+.home-layout,
+.home-shell,
+.market-dark,
+.market-light,
+.dashboard-shell,
+.premium-dashboard-page,
+.auth-page,
+.premium-footer,
+.hero-stage,
+.marquee,
+.customer-chat-shell,
+.support-chat-shell,
+.customer-community-page,
+.dashboard-main,
+.dashboard-main-pane,
+.jumia-hero {
+  background: #f8f8f8 !important;
+  color: #282828 !important;
+}
+
+.premium-nav,
+.premium-nav-home,
+.premium-nav-scrolled,
+.premium-nav:not(.premium-nav-home) {
+  background: #ffffff !important;
+  border-bottom: 1px solid #ededed !important;
+  color: #282828 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  backdrop-filter: none !important;
+}
+
+.nav-inner {
+  max-width: 1180px !important;
+  height: 3.5rem !important;
+  padding: 0 0.75rem !important;
+}
+
+.brand-gem {
+  background: #f68b1e !important;
+  color: #ffffff !important;
+  border-radius: 0.25rem !important;
+  box-shadow: none !important;
+  transform: none !important;
+  border: none !important;
+  font-weight: 700 !important;
+}
+
+.brand-name {
+  color: #282828 !important;
+  font-weight: 700 !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.02em !important;
+}
+
+.brand-name > span {
+  color: #f68b1e !important;
+}
+
+.nav-link {
+  color: #515151 !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  border-radius: 0.25rem !important;
+}
+
+.nav-link:hover,
+.nav-link-active {
+  color: #f68b1e !important;
+  background: rgba(246, 139, 30, 0.08) !important;
+}
+
+.nav-link-active::after {
+  background: #f68b1e !important;
+}
+
+.nav-search {
+  border: 1px solid #e0e0e0 !important;
+  background: #f8f8f8 !important;
+  border-radius: 0.25rem !important;
+}
+
+.nav-search:focus-within {
+  border-color: #f68b1e !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 2px rgba(246, 139, 30, 0.15) !important;
+}
+
+.nav-icon,
+.nav-account {
+  border: 1px solid #e8e8e8 !important;
+  background: #ffffff !important;
+  color: #515151 !important;
+  border-radius: 0.25rem !important;
+}
+
+.nav-icon:hover,
+.nav-account:hover {
+  background: #f8f8f8 !important;
+  color: #f68b1e !important;
+}
+
+.cart-count {
+  background: #f68b1e !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+.mobile-menu {
+  background: #ffffff !important;
+  border-top: 1px solid #ededed !important;
+}
+
+.mobile-search {
+  background: #f8f8f8 !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 0.25rem !important;
+}
+
+/* ── Jumia-style hero ── */
+.jumia-hero {
+  max-width: 1180px !important;
+  margin: 0 auto !important;
+  padding: 0.75rem 0.75rem 1.25rem !important;
+}
+
+.jumia-hero-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0.75rem !important;
+}
+
+@media (min-width: 900px) {
+  .jumia-hero-grid {
+    grid-template-columns: 1.7fr 1fr !important;
+    min-height: 22rem !important;
+  }
+}
+
+.jumia-banner {
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 0.5rem !important;
+  background: #ffffff !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  min-height: 16rem !important;
+}
+
+@media (min-width: 640px) {
+  .jumia-banner {
+    min-height: 20rem !important;
+  }
+}
+
+.jumia-banner-img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.jumia-banner-overlay {
+  position: relative !important;
+  z-index: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  min-height: 16rem !important;
+  padding: 1.25rem !important;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.55) 100%
+  ) !important;
+  color: #ffffff !important;
+}
+
+@media (min-width: 640px) {
+  .jumia-banner-overlay {
+    min-height: 20rem !important;
+    padding: 1.75rem !important;
+  }
+}
+
+.jumia-banner-kicker {
+  display: inline-block !important;
+  width: fit-content !important;
+  margin-bottom: 0.5rem !important;
+  padding: 0.2rem 0.55rem !important;
+  border-radius: 0.2rem !important;
+  background: #f68b1e !important;
+  color: #ffffff !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+}
+
+.jumia-banner-overlay h1 {
+  color: #ffffff !important;
+  font-size: clamp(1.35rem, 4vw, 2rem) !important;
+  font-weight: 700 !important;
+  margin: 0 0 0.4rem !important;
+  max-width: 18ch !important;
+  line-height: 1.2 !important;
+}
+
+.jumia-banner-overlay > p {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 0.875rem !important;
+  max-width: 32rem !important;
+  margin: 0 0 0.9rem !important;
+}
+
+.jumia-search {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  width: 100% !important;
+  max-width: 28rem !important;
+  background: #ffffff !important;
+  border-radius: 0.25rem !important;
+  padding: 0.25rem 0.25rem 0.25rem 0.75rem !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+.jumia-search svg {
+  color: #9b9b9b !important;
+  flex-shrink: 0 !important;
+}
+
+.jumia-search input {
+  flex: 1 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: #282828 !important;
+  font-size: 0.875rem !important;
+  min-width: 0 !important;
+}
+
+.jumia-search button {
+  border: 0 !important;
+  border-radius: 0.2rem !important;
+  background: #f68b1e !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 0.8125rem !important;
+  padding: 0.55rem 1rem !important;
+  cursor: pointer !important;
+}
+
+.jumia-search button:hover {
+  background: #e07b10 !important;
+}
+
+.jumia-banner-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+  margin-top: 0.85rem !important;
+}
+
+.jumia-btn-primary {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: #f68b1e !important;
+  color: #ffffff !important;
+  border-radius: 0.25rem !important;
+  padding: 0.55rem 1.1rem !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+.jumia-btn-primary:hover {
+  background: #e07b10 !important;
+}
+
+.jumia-btn-outline {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  border-radius: 0.25rem !important;
+  padding: 0.55rem 1.1rem !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+.jumia-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+.jumia-hero-side {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0.75rem !important;
+}
+
+@media (min-width: 900px) {
+  .jumia-hero-side {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 1fr 1fr 1.2fr !important;
+  }
+}
+
+.jumia-promo-card {
+  display: flex !important;
+  gap: 0.65rem !important;
+  align-items: center !important;
+  padding: 0.65rem !important;
+  background: #ffffff !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  overflow: hidden !important;
+  transition: box-shadow 0.2s ease, transform 0.2s ease !important;
+}
+
+.jumia-promo-card:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-2px);
+}
+
+.jumia-promo-card img {
+  width: 4.25rem !important;
+  height: 4.25rem !important;
+  object-fit: cover !important;
+  border-radius: 0.35rem !important;
+  background: #f0f0f0 !important;
+  flex-shrink: 0 !important;
+}
+
+.jumia-promo-card span {
+  display: block !important;
+  color: #f68b1e !important;
+  font-size: 0.65rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+
+.jumia-promo-card strong {
+  display: block !important;
+  color: #282828 !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  margin: 0.15rem 0 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+.jumia-promo-card p {
+  color: #282828 !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+}
+
+.jumia-video-card {
+  position: relative !important;
+  grid-column: 1 / -1 !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+  background: #111 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+  min-height: 7.5rem !important;
+}
+
+@media (min-width: 900px) {
+  .jumia-video-card {
+    grid-column: auto !important;
+    min-height: 0 !important;
+  }
+}
+
+.jumia-video-card video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  min-height: 7.5rem !important;
+}
+
+.jumia-video-label {
+  position: absolute !important;
+  left: 0.65rem !important;
+  bottom: 0.65rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  padding: 0.3rem 0.55rem !important;
+  border-radius: 0.2rem !important;
+  background: rgba(0, 0, 0, 0.65) !important;
+  color: #ffffff !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+}
+
+.jumia-trust-row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0.5rem !important;
+  margin-top: 0.75rem !important;
+  padding: 0.75rem !important;
+  background: #ffffff !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+@media (min-width: 720px) {
+  .jumia-trust-row {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+.jumia-trust-row > div {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+  color: #515151 !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+}
+
+.jumia-trust-row svg {
+  color: #f68b1e !important;
+  flex-shrink: 0 !important;
+}
+
+/* Hide old decorative hero bits */
+.hero-orbit,
+.hero-noise,
+.hero-grid,
+.visual-halo,
+.visual-ring,
+.scroll-cue,
+.marquee,
+.search-ai {
+  display: none !important;
+}
+
+/* ── Sections ── */
+.home-section {
+  max-width: 1180px !important;
+  margin: 0 auto !important;
+  padding: 1rem 0.75rem 1.5rem !important;
+  background: transparent !important;
+}
+
+.section-heading-row h2,
+.experience-copy h2 {
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+  color: #282828 !important;
+}
+
+.eyebrow,
+.luxury-eyebrow {
+  color: #f68b1e !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.06em !important;
+}
+
+.luxury-eyebrow > span {
+  background: #f68b1e !important;
+}
+
+.text-link-gold {
+  color: #f68b1e !important;
+  font-weight: 600 !important;
+  font-size: 0.8125rem !important;
+}
+
+.button-gold,
+.auth-submit,
+.jumia-btn-primary {
+  background: #f68b1e !important;
+  color: #ffffff !important;
+  border-radius: 0.25rem !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+
+.button-gold:hover,
+.auth-submit:hover {
+  background: #e07b10 !important;
+}
+
+.button-gold::before {
+  display: none !important;
+}
+
+.button-ghost {
+  border: 1px solid #e0e0e0 !important;
+  background: #ffffff !important;
+  color: #282828 !important;
+  border-radius: 0.25rem !important;
+}
+
+/* ── Product cards (Jumia style) ── */
+.luxury-product-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 0.5rem !important;
+}
+
+@media (min-width: 640px) {
+  .luxury-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.65rem !important;
+  }
+}
+
+@media (min-width: 960px) {
+  .luxury-product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 0.75rem !important;
+  }
+}
+
+.luxury-product-card {
+  border: none !important;
+  border-radius: 0.35rem !important;
+  background: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+  overflow: hidden !important;
+  transition: box-shadow 0.2s ease, transform 0.2s ease !important;
+}
+
+.luxury-product-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.luxury-product-media {
+  background: #f5f5f5 !important;
+  aspect-ratio: 1 / 1 !important;
+}
+
+.luxury-product-media img {
+  transition: transform 0.3s ease !important;
+}
+
+.luxury-product-card:hover .luxury-product-media img {
+  transform: scale(1.04) !important;
+}
+
+.product-aura,
+.product-reflection {
+  display: none !important;
+}
+
+.product-wishlist {
+  background: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
+  color: #6c6c6c !important;
+}
+
+.product-wishlist-active {
+  color: #e53935 !important;
+}
+
+.luxury-product-body {
+  padding: 0.55rem 0.65rem 0.75rem !important;
+  background: #ffffff !important;
+}
+
+.product-meta {
+  color: #9b9b9b !important;
+  font-size: 0.65rem !important;
+}
+
+.product-rating {
+  color: #f68b1e !important;
+}
+
+.luxury-product-body h3 {
+  font-size: 0.8rem !important;
+  font-weight: 400 !important;
+  color: #282828 !important;
+  line-height: 1.35 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+.luxury-product-card:hover h3 {
+  color: #f68b1e !important;
+}
+
+.product-price {
+  font-weight: 700 !important;
+  color: #282828 !important;
+  font-size: 0.95rem !important;
+}
+
+.price-label {
+  display: none !important;
+}
+
+.product-add {
+  background: #f68b1e !important;
+  border: none !important;
+  color: #ffffff !important;
+  border-radius: 0.25rem !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+}
+
+.luxury-product-card:hover .product-add {
+  background: #e07b10 !important;
+  color: #ffffff !important;
+}
+
+/* ── Experience / closing ── */
+.experience-section {
+  max-width: 1180px !important;
+  margin: 0 auto !important;
+  padding: 1rem 0.75rem 2rem !important;
+  background: transparent !important;
+}
+
+.experience-card,
+.catalog-message,
+.closing-cta {
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  color: #515151 !important;
+}
+
+.experience-number,
+.experience-icon {
+  color: #f68b1e !important;
+}
+
+.experience-icon {
+  background: rgba(246, 139, 30, 0.1) !important;
+}
+
+/* ── Footer ── */
+.premium-footer {
+  background: #ffffff !important;
+  border-top: 1px solid #ededed !important;
+  color: #6c6c6c !important;
+}
+
+.footer-newsletter {
+  background: #f8f8f8 !important;
+  border: 1px solid #ededed !important;
+}
+
+.footer-newsletter button {
+  background: #f68b1e !important;
+  color: #ffffff !important;
+}
+
+.footer-links a:hover {
+  color: #f68b1e !important;
+}
+
+/* ── Dashboard ── */
+.dashboard-sidebar {
+  background: #ffffff !important;
+  border-color: #ededed !important;
+}
+
+.dashboard-sidebar-link-active {
+  background: rgba(246, 139, 30, 0.1) !important;
+  color: #f68b1e !important;
+}
+
+.dashboard-header {
+  background: #ffffff !important;
+  border-color: #ededed !important;
+}
+
+.dashboard-kicker {
+  color: #f68b1e !important;
+}
+
+.dashboard-panel,
+.dashboard-stat-card {
+  background: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  border-radius: 0.5rem !important;
+}
+
+/* ── Auth ── */
+.auth-page {
+  background: #f8f8f8 !important;
+}
+
+.auth-card {
+  background: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 0.5rem !important;
+}
+
+.auth-role-btn.active {
+  border-color: #f68b1e !important;
+  background: rgba(246, 139, 30, 0.08) !important;
+  color: #f68b1e !important;
+}
+
+.auth-footer a {
+  color: #f68b1e !important;
+}
+
+/* ── Community pages ── */
+.customer-community-page {
+  background: #f8f8f8 !important;
+}
+
+.following-card,
+.customer-update-card,
+.community-empty {
+  background: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+}
+
+.following-card:hover,
+.customer-update-card:hover {
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1) !important;
+}
+
+.following-card-body h2,
+.community-empty h2 {
+  color: #282828 !important;
+}
+
+.following-card-actions a:hover,
+.following-card-actions button:hover {
+  background: #f68b1e !important;
+  border-color: #f68b1e !important;
+  color: #ffffff !important;
+}
+
+.customer-update-vendor span:first-child {
+  color: #f68b1e !important;
+}
+
+/* ── Chat ── */
+.customer-chat-shell,
+.support-chat-shell {
+  background: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06) !important;
+}
+
+.customer-chat-sidebar-head {
+  background: #f68b1e !important;
+  color: #ffffff !important;
+}
+
+.chat-message-bubble.mine {
+  background: #f68b1e !important;
+  color: #ffffff !important;
+}
+
+.chat-message-bubble.theirs {
+  background: #f0f0f0 !important;
+  color: #282828 !important;
+}
+
+/* Tailwind utility force */
+.bg-white,
+.bg-gray-50,
+.bg-gray-100,
+.bg-\[\#f5f5f7\] {
+  background-color: #ffffff !important;
+}
+
+.market-dark .bg-white,
+.market-light .bg-white,
+.home-layout .bg-white,
+.dashboard-shell .bg-white {
+  background-color: #ffffff !important;
+  color: #282828 !important;
+}
+
+.market-dark .bg-gray-50,
+.market-light .bg-gray-50,
+.home-layout .bg-gray-50 {
+  background-color: #f8f8f8 !important;
+}
+
+.text-gray-900,
+.text-gray-800,
+.market-dark .text-gray-900,
+.market-light .text-gray-900 {
+  color: #282828 !important;
+}
+
+.text-gray-600,
+.text-gray-500,
+.text-gray-400 {
+  color: #6c6c6c !important;
+}
+
+.bg-indigo-600 {
+  background-color: #f68b1e !important;
+}
+
+.bg-indigo-600:hover,
+.hover\:bg-indigo-700:hover {
+  background-color: #e07b10 !important;
+}
+
+.text-indigo-600,
+.text-indigo-700 {
+  color: #f68b1e !important;
+}
+
+.bg-indigo-50 {
+  background-color: rgba(246, 139, 30, 0.1) !important;
+}
+
+.border-indigo-600 {
+  border-color: #f68b1e !important;
+}
+
+/* Main content area consistent */
+main {
+  background: transparent !important;
+}
+
+/* Kill leftover dark gradients from index.css */
+.home-shell,
+.hero-stage,
+.auth-page,
+body {
+  background-image: none !important;
+}

@@ -12,6 +12,7 @@ import './styles/minimal-aesthetic.css';
 import './styles/light-mode-text.css';
 import './styles/light-only.css';
 import './styles/white-clean.css';
+import './styles/jumia-theme.css';
 import './notification-ui.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
