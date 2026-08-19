@@ -123,8 +123,8 @@ const Home = () => {
               ABUAD campus market
             </div>
             <h1>
-              Campus finds,
-              <span>quietly curated.</span>
+              Shop campus.
+              <span>Simple and trusted.</span>
             </h1>
             <p>
               Essentials, rare pieces, and trusted sellers—all in one calm marketplace built for

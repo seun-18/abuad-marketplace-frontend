@@ -11,6 +11,7 @@ import './index.css';
 import './styles/minimal-aesthetic.css';
 import './styles/light-mode-text.css';
 import './styles/light-only.css';
+import './styles/white-clean.css';
 import './notification-ui.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
