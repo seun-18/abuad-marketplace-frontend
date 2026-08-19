@@ -68,15 +68,23 @@ const ChatComposer = ({ conversationId, disabled, onSendText, onSendMediaMessage
     }
   };
 
-  const onPickImage = async (e) => {
+  const onPickMedia = async (e) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setError('Please choose an image file.');
+    if (file.type.startsWith('image/')) {
+      await uploadAndSend(file, 'image');
       return;
     }
-    await uploadAndSend(file, 'image');
+    if (file.type.startsWith('video/')) {
+      if (file.size > 25 * 1024 * 1024) {
+        setError('Video must be under 25MB.');
+        return;
+      }
+      await uploadAndSend(file, 'video');
+      return;
+    }
+    setError('Please choose an image or video file.');
   };
 
   const startRecording = async () => {
@@ -152,9 +160,9 @@ const ChatComposer = ({ conversationId, disabled, onSendText, onSendMediaMessage
         <input
           ref={fileRef}
           type="file"
-          accept="image/jpeg,image/png,image/gif,image/webp"
+          accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/*"
           className="chat-file-input"
-          onChange={onPickImage}
+          onChange={onPickMedia}
         />
         <button
           type="button"

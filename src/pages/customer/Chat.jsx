@@ -7,6 +7,7 @@ import { useE2EChat } from '../../hooks/useE2EChat';
 import MessageBubble from '../../components/chat/MessageBubble';
 import ChatComposer from '../../components/chat/ChatComposer';
 import ChatShell from '../../components/chat/ChatShell';
+import { getErrorMessage } from '../../utils/errors';
 
 const CustomerChat = () => {
   const { user } = useAuth();
@@ -133,7 +134,7 @@ const CustomerChat = () => {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err.response?.data?.message || 'Could not start a chat with this vendor.');
+          setError(getErrorMessage(err, 'Could not start a chat with this vendor.'));
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -157,7 +158,7 @@ const CustomerChat = () => {
       setConversations(customerConversations);
       return customerConversations;
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load conversations.');
+      setError(getErrorMessage(err, 'Failed to load conversations.'));
       return [];
     } finally {
       setLoading(false);
@@ -222,7 +223,7 @@ const CustomerChat = () => {
       }
       setVendorId('');
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Failed to start the conversation.');
+      setError(getErrorMessage(err, 'Failed to start the conversation.'));
     } finally {
       setLoading(false);
     }

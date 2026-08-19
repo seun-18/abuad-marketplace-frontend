@@ -1,4 +1,4 @@
-import { Mic } from 'lucide-react';
+import { Mic, Play } from 'lucide-react';
 import React from 'react';
 import { resolveImageUrl } from '../../utils/imageUrl';
 
@@ -18,7 +18,7 @@ const formatDuration = (sec) => {
 };
 
 /**
- * WhatsApp-style message bubble supporting text, image, and voice.
+ * Message bubble: text, image, video, and voice.
  */
 const MessageBubble = ({ msg, isMine }) => {
   const type = msg.message_type || 'text';
@@ -29,8 +29,23 @@ const MessageBubble = ({ msg, isMine }) => {
       <div className={`chat-message-bubble ${isMine ? 'mine' : 'theirs'}`}>
         {type === 'image' && media && (
           <a href={media} target="_blank" rel="noopener noreferrer" className="chat-media-image">
-            <img src={media} alt="Shared" loading="lazy" />
+            <img
+              src={media}
+              alt="Shared photo"
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
           </a>
+        )}
+
+        {type === 'video' && media && (
+          <div className="chat-media-video">
+            <video controls playsInline preload="metadata" poster="">
+              <source src={media} type={msg.media_mime || 'video/mp4'} />
+            </video>
+          </div>
         )}
 
         {type === 'voice' && media && (

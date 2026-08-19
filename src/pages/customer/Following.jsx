@@ -11,6 +11,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios';
 import { resolveImageUrl } from '../../utils/imageUrl';
+import { getErrorMessage } from '../../utils/errors';
+import ErrorAlert from '../../components/ErrorAlert';
 
 const Following = () => {
   const [vendors, setVendors] = useState([]);
@@ -28,7 +30,7 @@ const Following = () => {
       if (followingResponse.data.success) setVendors(followingResponse.data.data || []);
       if (directoryResponse.data.success) setDirectory(directoryResponse.data.data || []);
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Could not load approved vendors.');
+      setError(getErrorMessage(requestError, 'Could not load approved vendors.'));
     } finally {
       setLoading(false);
     }
@@ -66,7 +68,7 @@ const Following = () => {
         );
       }
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Could not update this vendor.');
+      setError(getErrorMessage(requestError, 'Could not update this vendor.'));
     } finally {
       setBusyId(null);
     }
@@ -86,7 +88,7 @@ const Following = () => {
         </Link>
       </div>
 
-      {error && <div className="wishlist-error">{error}</div>}
+      {error ? <ErrorAlert title="Something went wrong" message={error} onRetry={loadFollowing} onDismiss={() => setError('')} /> : null}
 
       {loading ? (
         <div className="following-grid" aria-label="Loading followed vendors">
@@ -109,6 +111,14 @@ const Following = () => {
                 <img
                   src={resolveImageUrl(vendor.cover_image || vendor.shop_logo)}
                   alt={`${vendor.shop_name} storefront`}
+                  loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.src =
+                      'data:image/svg+xml,' +
+                      encodeURIComponent(
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240"><rect fill="%23f3f3f3" width="100%" height="100%"/><text x="50%" y="50%" fill="%23999" text-anchor="middle" dy=".3em" font-family="sans-serif" font-size="14">No image</text></svg>'
+                      );
+                  }}
                 />
                 <span>
                   <BadgeCheck size={14} />

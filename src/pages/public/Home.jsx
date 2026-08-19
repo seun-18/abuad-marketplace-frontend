@@ -139,10 +139,6 @@ const Home = () => {
                 placeholder={typedPlaceholder || 'Search the marketplace…'}
                 aria-label="Search the marketplace"
               />
-              <span className="search-ai">
-                <Sparkles size={13} aria-hidden="true" />
-                AI
-              </span>
               <button type="submit" aria-label="Submit search">
                 <ArrowRight size={18} aria-hidden="true" />
               </button>

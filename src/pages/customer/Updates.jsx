@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios';
 import { resolveImageUrl } from '../../utils/imageUrl';
+import { getErrorMessage } from '../../utils/errors';
+import ErrorAlert from '../../components/ErrorAlert';
 
 const CustomerUpdates = () => {
   const [updates, setUpdates] = useState([]);
@@ -16,7 +18,7 @@ const CustomerUpdates = () => {
         if (response.data.success) setUpdates(response.data.data || []);
       })
       .catch((requestError) => {
-        setError(requestError.response?.data?.message || 'Could not load seller updates.');
+        setError(getErrorMessage(requestError, 'Could not load seller updates.'));
       })
       .finally(() => setLoading(false));
   }, []);
@@ -35,7 +37,7 @@ const CustomerUpdates = () => {
         </Link>
       </div>
 
-      {error && <div className="wishlist-error">{error}</div>}
+      {error ? <ErrorAlert title="Could not load updates" message={error} onDismiss={() => setError('')} /> : null}
 
       {loading ? (
         <div className="customer-update-list" aria-label="Loading updates">
@@ -55,11 +57,23 @@ const CustomerUpdates = () => {
           {updates.map((update) => (
             <article key={update.id} className="customer-update-card">
               <div className="customer-update-media">
-                <img
-                  src={resolveImageUrl(update.image_url || update.shop_logo)}
-                  alt=""
-                  loading="lazy"
-                />
+                {update.media_type === 'video' && update.image_url ? (
+                  <video
+                    controls
+                    playsInline
+                    preload="metadata"
+                    src={resolveImageUrl(update.image_url)}
+                  />
+                ) : (
+                  <img
+                    src={resolveImageUrl(update.image_url || update.shop_logo)}
+                    alt=""
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.style.opacity = '0.35';
+                    }}
+                  />
+                )}
               </div>
               <div className="customer-update-content">
                 <div className="customer-update-vendor">
