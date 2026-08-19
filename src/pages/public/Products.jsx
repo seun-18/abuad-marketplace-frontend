@@ -1,16 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../../api/axios';
 import ProductCard from '../../components/ProductCard';
 import { getErrorMessage } from '../../utils/errors';
 import ErrorAlert from '../../components/ErrorAlert';
 
+// The API nests subcategories inside each top-level category's
+// `subcategories` array — flatten so shoppers can actually filter by them.
+const flattenCategories = (tree) =>
+  tree.flatMap((parent) => [
+    { ...parent, depth: 0 },
+    ...(parent.subcategories || []).map((sub) => ({ ...sub, depth: 1 })),
+  ]);
+
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // State for API response
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [categoryTree, setCategoryTree] = useState([]);
+  const categories = useMemo(() => flattenCategories(categoryTree), [categoryTree]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState('');
@@ -31,7 +40,7 @@ const Products = () => {
       try {
         const res = await api.get('/categories/index.php');
         if (res.data.success) {
-          setCategories(res.data.data || []);
+          setCategoryTree(res.data.data || []);
         }
       } catch (err) {
         console.error('Failed to load categories', err);
@@ -135,7 +144,7 @@ const Products = () => {
             <option value="">All Categories</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.slug}>
-                {cat.name}
+                {cat.depth ? `\u00A0\u00A0↳ ${cat.name}` : cat.name}
               </option>
             ))}
           </select>
@@ -182,7 +191,10 @@ const Products = () => {
             <label className="text-xs font-semibold text-gray-500 uppercase">Sort by:</label>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setPage(1);
+              }}
               className="px-3 py-1.5 border rounded-md text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
             >
               <option value="latest">Newest Arrivals</option>

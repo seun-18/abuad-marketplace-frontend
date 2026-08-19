@@ -3,8 +3,18 @@ import { useEffect, useMemo, useState } from 'react';
 import api from '../../api/axios';
 import { resolveImageUrl } from '../../utils/imageUrl';
 
+// The API returns only top-level categories, each with a `subcategories` array
+// nested inside it. Flatten that tree so subcategories are selectable and
+// visible too, instead of silently disappearing from every list on this page.
+const flattenCategories = (tree) =>
+  tree.flatMap((parent) => [
+    { ...parent, depth: 0 },
+    ...(parent.subcategories || []).map((sub) => ({ ...sub, depth: 1 })),
+  ]);
+
 const VendorCategories = () => {
-  const [categories, setCategories] = useState([]);
+  const [categoryTree, setCategoryTree] = useState([]);
+  const categories = useMemo(() => flattenCategories(categoryTree), [categoryTree]);
   const [form, setForm] = useState({
     name: '',
     parent_id: '',
@@ -28,7 +38,7 @@ const VendorCategories = () => {
   const fetchCategories = async () => {
     try {
       const response = await api.get('/categories/index.php');
-      if (response.data.success) setCategories(response.data.data || []);
+      if (response.data.success) setCategoryTree(response.data.data || []);
     } catch (requestError) {
       setError(requestError.response?.data?.message || 'Could not load categories.');
     } finally {
@@ -138,11 +148,13 @@ const VendorCategories = () => {
               }
             >
               <option value="">Top-level category</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
+              {categories
+                .filter((category) => category.depth === 0)
+                .map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
             </select>
           </label>
           <label>
@@ -194,10 +206,13 @@ const VendorCategories = () => {
           </div>
           <div className="admin-category-list">
             {categories.map((category) => (
-              <article key={category.id}>
+              <article key={category.id} style={category.depth ? { paddingLeft: '1.5rem' } : undefined}>
                 <img src={resolveImageUrl(category.category_image)} alt="" />
                 <div>
-                  <p>{category.name}</p>
+                  <p>
+                    {category.depth ? '↳ ' : ''}
+                    {category.name}
+                  </p>
                   <span>
                     {Number(category.product_count || 0).toLocaleString()} products ·{' '}
                     {Number(category.units_sold || 0).toLocaleString()} sales
