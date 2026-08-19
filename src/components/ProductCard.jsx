@@ -49,8 +49,8 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <article className="luxury-product-card">
-      <div className="luxury-product-media">
+    <article className="product-card">
+      <div className="product-card-media">
         <button
           type="button"
           className={`product-wishlist ${saved ? 'product-wishlist-active' : ''}`}
@@ -61,7 +61,7 @@ const ProductCard = ({ product }) => {
           disabled={saving}
           onClick={handleWishlist}
         >
-          <Heart size={16} fill={saved ? 'currentColor' : 'none'} aria-hidden="true" />
+          <Heart size={15} fill={saved ? 'currentColor' : 'none'} aria-hidden="true" />
         </button>
         <Link to={slug ? `/product/${slug}` : '/products'} aria-label={`View ${product.name}`}>
           <img
@@ -75,9 +75,9 @@ const ProductCard = ({ product }) => {
         </Link>
       </div>
 
-      <div className="luxury-product-body">
+      <div className="product-card-body">
         <div className="product-meta">
-          <span>{product.brand || product.shop_name || 'Campus select'}</span>
+          <span>{product.brand || product.shop_name || 'Campus'}</span>
           {product.average_rating ? (
             <span className="product-rating">
               <Star size={11} fill="currentColor" aria-hidden="true" />
@@ -104,7 +104,7 @@ const ProductCard = ({ product }) => {
             className="product-add"
             aria-label={`Add ${product.name} to bag`}
           >
-            <Plus size={16} aria-hidden="true" />
+            <Plus size={14} aria-hidden="true" />
             <span>Add</span>
           </button>
         </div>

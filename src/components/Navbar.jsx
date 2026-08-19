@@ -16,13 +16,21 @@ const Navbar = () => {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => setMenuOpen(false), [location.pathname]);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [menuOpen]);
 
   const navClass = ({ isActive }) => `nav-link ${isActive ? 'nav-link-active' : ''}`;
 
@@ -48,12 +56,12 @@ const Navbar = () => {
         <Link to="/" className="brand-mark" aria-label="ABUAD Market Place home">
           <span className="brand-gem">A</span>
           <span className="brand-name">
-            ABUAD <span>MARKET PLACE</span>
+            ABUAD <span>MARKET</span>
           </span>
         </Link>
 
         <div className="nav-links">
-          <NavLink to="/" className={navClass}>
+          <NavLink to="/" className={navClass} end>
             Discover
           </NavLink>
           <NavLink to="/products" className={navClass}>
@@ -64,7 +72,7 @@ const Navbar = () => {
               Categories
             </Link>
             <div className="category-popover">
-              <p>Explore collections</p>
+              <p>Explore</p>
               <Link to="/products?category=electronics">
                 Electronics <span>→</span>
               </Link>
@@ -81,12 +89,6 @@ const Navbar = () => {
           </div>
           {user?.role === 'customer' && (
             <>
-              <NavLink to="/customer/following" className={navClass}>
-                Following
-              </NavLink>
-              <NavLink to="/customer/updates" className={navClass}>
-                Updates
-              </NavLink>
               <NavLink to="/customer/orders" className={navClass}>
                 Orders
               </NavLink>
@@ -97,7 +99,7 @@ const Navbar = () => {
           )}
           {user?.role === 'vendor' && (
             <NavLink to="/vendor/dashboard" className={navClass}>
-              Seller portal
+              Seller
             </NavLink>
           )}
           {user?.role === 'super_admin' && (
@@ -109,11 +111,11 @@ const Navbar = () => {
 
         <div className="nav-actions">
           <form onSubmit={handleSearch} className="nav-search" role="search">
-            <Search size={16} aria-hidden="true" />
+            <Search size={15} aria-hidden="true" />
             <input
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search anything"
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search…"
               aria-label="Search products"
             />
           </form>
@@ -137,24 +139,24 @@ const Navbar = () => {
 
           {user ? (
             <button type="button" onClick={handleLogout} className="nav-account" title="Sign out">
-              <UserRound size={16} aria-hidden="true" />
+              <UserRound size={15} aria-hidden="true" />
               <span>{user.first_name || 'Account'}</span>
             </button>
           ) : (
             <Link to="/login" className="nav-account">
-              <UserRound size={16} aria-hidden="true" />
+              <UserRound size={15} aria-hidden="true" />
               <span>Sign in</span>
             </Link>
           )}
 
           <button
             type="button"
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={() => setMenuOpen((o) => !o)}
             className="mobile-menu-button"
-            aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
           >
-            {menuOpen ? <X size={21} /> : <Menu size={21} />}
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </div>
@@ -165,12 +167,13 @@ const Navbar = () => {
             <Search size={17} aria-hidden="true" />
             <input
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="What are you looking for?"
               aria-label="Search products"
+              autoFocus
             />
           </form>
-          <NavLink to="/" className={navClass}>
+          <NavLink to="/" className={navClass} end>
             Discover
           </NavLink>
           <NavLink to="/products" className={navClass}>

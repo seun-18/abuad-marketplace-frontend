@@ -7,15 +7,9 @@ const MainLayout = () => {
   const isHome = pathname === '/';
 
   return (
-    <div className="flex min-h-screen min-h-[100dvh] flex-col home-layout market-light">
+    <div className="flex min-h-screen min-h-[100dvh] flex-col home-layout">
       <Navbar />
-      <main
-        className={
-          isHome
-            ? 'w-full flex-grow'
-            : 'mx-auto w-full max-w-[1180px] flex-grow px-3 py-3 sm:px-4 sm:py-5'
-        }
-      >
+      <main className={isHome ? 'w-full flex-grow' : 'page-shell flex-grow'}>
         <Outlet />
       </main>
       <Footer />
