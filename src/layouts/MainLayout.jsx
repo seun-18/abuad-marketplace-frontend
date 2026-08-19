@@ -1,26 +1,26 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import Footer from '../components/Footer';
-import Navbar from '../components/Navbar';
-import BottomNav from '../components/BottomNav';
+import CampusHeader from '../components/layout/CampusHeader';
+import BottomNav from '../components/layout/BottomNav';
 
 const MainLayout = () => {
   const { pathname } = useLocation();
   const isHome = pathname === '/';
+  // Hide bottom nav on auth-heavy paths if desired — keep for main app
+  const showBottomNav = !pathname.startsWith('/login') && !pathname.startsWith('/register');
 
   return (
-    <div className="flex min-h-screen min-h-[100dvh] flex-col home-layout market-light market-app">
-      <Navbar />
+    <div className="flex min-h-screen min-h-[100dvh] flex-col home-layout">
+      <CampusHeader />
       <main
-        className={
-          isHome
-            ? 'w-full flex-grow'
-            : 'mx-auto w-full max-w-[1180px] flex-grow px-3 py-3 sm:px-4 sm:py-5'
-        }
+        className={`${isHome ? 'w-full flex-grow' : 'page-shell flex-grow'} ${
+          showBottomNav ? 'main-with-bottom-nav' : ''
+        }`}
       >
         <Outlet />
       </main>
       <Footer />
-      <BottomNav />
+      {showBottomNav && <BottomNav />}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { Heart, MapPin, Plus, ShieldCheck, Star } from 'lucide-react';
+import { Check, Heart, MapPin, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import { resolveImageUrl } from '../utils/imageUrl';
 import { getErrorMessage } from '../utils/errors';
+import { getSavedHall } from '../config/campus';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
@@ -14,15 +15,15 @@ const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState('');
+
   const price = Number(product.base_price || product.price || 0);
+  const compareAt = Number(product.compare_at_price || product.old_price || 0);
   const productId = product.id || product.product_id;
   const saved = isWishlisted(productId);
   const slug = product.slug;
-  const verified = Boolean(
-    product.vendor_verified || product.is_verified || product.verified_seller || product.vendor_is_verified
-  );
-  const location = product.campus_location_name || product.location_name || product.pickup_location || 'Campus pickup';
-  const walkingTime = product.distance_minutes ? `${product.distance_minutes} min away` : '';
+  const hall = getSavedHall();
+  const locationLabel =
+    product.dropoff_location || product.location || `${hall.short} · nearby`;
 
   const handleWishlist = async (event) => {
     event.preventDefault();
@@ -54,71 +55,63 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <article className="market-product-card">
-      <div className="market-product-media">
+    <article className="product-card">
+      <div className="product-card-media">
+        <div className="verified-badge">
+          <Check size={10} strokeWidth={3} aria-hidden="true" />
+          Verified ABUAD Student
+        </div>
+        <button
+          type="button"
+          className={`product-wishlist ${saved ? 'product-wishlist-active' : ''}`}
+          aria-label={`${saved ? 'Remove' : 'Save'} ${product.name}`}
+          aria-pressed={saved}
+          disabled={saving}
+          onClick={handleWishlist}
+        >
+          <Heart size={15} fill={saved ? 'currentColor' : 'none'} aria-hidden="true" />
+        </button>
         <Link to={slug ? `/product/${slug}` : '/products'} aria-label={`View ${product.name}`}>
           <img
             src={resolveImageUrl(product.primary_image || product.image_url)}
             alt={product.name || 'Product'}
             loading="lazy"
-            onError={(event) => { event.currentTarget.style.opacity = '0.35'; }}
+            onError={(e) => {
+              e.currentTarget.style.opacity = '0.4';
+            }}
           />
         </Link>
-
-        {verified && (
-          <span className="market-verified-badge">
-            <ShieldCheck size={12} aria-hidden="true" />
-            Verified seller
-          </span>
-        )}
-
-        <button
-          type="button"
-          className={`market-wishlist ${saved ? 'is-saved' : ''}`}
-          aria-label={`${saved ? 'Remove' : 'Save'} ${product.name} ${saved ? 'from' : 'to'} wishlist`}
-          aria-pressed={saved}
-          disabled={saving}
-          onClick={handleWishlist}
-        >
-          <Heart size={17} fill={saved ? 'currentColor' : 'none'} />
-        </button>
       </div>
 
-      <div className="market-product-body">
-        <div className="market-product-meta">
-          <span>{product.brand || product.shop_name || 'ABUAD seller'}</span>
-          {product.average_rating ? (
-            <span className="market-rating">
-              <Star size={11} fill="currentColor" />
-              {product.average_rating}
-            </span>
-          ) : null}
-        </div>
-
-        <Link to={slug ? `/product/${slug}` : '/products'} className="market-product-title">
-          {product.name}
+      <div className="product-card-body">
+        <Link to={slug ? `/product/${slug}` : '/products'}>
+          <h3>{product.name}</h3>
         </Link>
-
-        {actionError ? <p className="market-product-error" role="alert">{actionError}</p> : null}
-
-        <div className="market-price-row">
-          <div>
-            <span className="market-price">₦{price.toLocaleString()}</span>
-            {product.compare_at_price && Number(product.compare_at_price) > price ? (
-              <span className="market-old-price">₦{Number(product.compare_at_price).toLocaleString()}</span>
-            ) : null}
-          </div>
-          <button type="button" onClick={handleAdd} className="market-quick-add" aria-label={`Add ${product.name} to bag`}>
-            <Plus size={20} />
-          </button>
+        <div className="product-price-row">
+          <span className="product-price">₦{price.toLocaleString()}</span>
+          {compareAt > price && (
+            <span className="product-price-old">₦{compareAt.toLocaleString()}</span>
+          )}
         </div>
-
-        <div className="market-product-location">
-          <MapPin size={13} />
-          <span>{location}</span>
-          {walkingTime && <span>• {walkingTime}</span>}
+        <div className="product-location">
+          <MapPin size={11} aria-hidden="true" />
+          <span>{locationLabel}</span>
         </div>
+        {actionError ? (
+          <p className="text-xs text-rose-600 mt-1" role="alert">
+            {actionError}
+          </p>
+        ) : null}
       </div>
+
+      <button
+        type="button"
+        className="product-quick-add"
+        onClick={handleAdd}
+        aria-label={`Add ${product.name} to bag`}
+      >
+        <Plus size={22} strokeWidth={2.5} aria-hidden="true" />
+      </button>
     </article>
   );
 };
