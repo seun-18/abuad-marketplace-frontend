@@ -6,18 +6,20 @@ import {
   ShieldCheck,
   Sparkles,
   Star,
+  Zap,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import trustCommunityImage from '../../assets/abuad-trust-community.jpg';
 import CategoryGrid from '../../components/CategoryGrid';
 import ProductCard from '../../components/ProductCard';
 import VendorUpdatesFeed from '../../components/VendorUpdatesFeed';
+import { resolveImageUrl } from '../../utils/imageUrl';
 import { getErrorMessage } from '../../utils/errors';
 import ErrorAlert from '../../components/ErrorAlert';
 
-const searchIdeas = ['iPhone', 'laptops', 'Nike shoes', 'headphones', 'textbooks'];
+const searchIdeas = ['iPhone 15 Pro', 'gaming laptops', 'Nike shoes', 'wireless headphones'];
 
 const Home = () => {
   const navigate = useNavigate();
@@ -34,16 +36,16 @@ const Home = () => {
         if (response.data.success) {
           setFeaturedProducts(response.data.data?.products || []);
         } else {
-          setCatalogError(response.data.message || 'Catalog temporarily unavailable.');
+          setCatalogError(response.data.message || 'The live catalog is temporarily unavailable.');
         }
       } catch (err) {
-        setCatalogError(
-          getErrorMessage(err, 'Catalog temporarily unavailable. Please try again shortly.')
-        );
+        console.error('Failed to fetch home products:', err);
+        setCatalogError(getErrorMessage(err, 'The live catalog is temporarily unavailable. Please try again shortly.'));
       } finally {
         setLoading(false);
       }
     };
+
     fetchHomeData();
   }, []);
 
@@ -60,17 +62,19 @@ const Home = () => {
 
       if (!deleting && characterIndex === phrase.length) {
         deleting = true;
-        timer = window.setTimeout(type, 1400);
+        timer = window.setTimeout(type, 1500);
         return;
       }
+
       if (deleting && characterIndex === 0) {
         deleting = false;
         ideaIndex = (ideaIndex + 1) % searchIdeas.length;
       }
-      timer = window.setTimeout(type, deleting ? 30 : 65);
+
+      timer = window.setTimeout(type, deleting ? 35 : 70);
     };
 
-    timer = window.setTimeout(type, 400);
+    timer = window.setTimeout(type, 450);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -80,108 +84,165 @@ const Home = () => {
     navigate(query ? `/products?search=${encodeURIComponent(query)}` : '/products');
   };
 
+  const heroProducts = useMemo(() => featuredProducts.slice(0, 3), [featuredProducts]);
+
   const features = [
     {
       Icon: ShieldCheck,
       title: 'Protected payments',
-      copy: 'Secure Paystack checkout and a clear order trail from cart to delivery.',
+      copy: 'Secure checkout and a trusted order trail from cart to delivery.',
       number: '01',
     },
     {
       Icon: BadgeCheck,
       title: 'Verified sellers',
-      copy: 'Shop independent stores and trusted vendors right around campus.',
+      copy: 'Discover independent stores and trusted vendors around campus.',
       number: '02',
     },
     {
       Icon: MessageCircleMore,
-      title: 'Direct chat',
-      copy: 'Ask questions, confirm details, and buy with confidence.',
+      title: 'Direct connection',
+      copy: 'Ask questions, confirm details, and buy with total confidence.',
       number: '03',
     },
   ];
 
   return (
     <div className="home-shell">
-      {/* Hero */}
-      <section className="hero">
-        <div className="hero-inner">
-          <div className="hero-banner">
+      <section className="jumia-hero">
+        <div className="jumia-hero-grid">
+          <div className="jumia-banner">
             <img
-              className="hero-banner-img"
+              className="jumia-banner-img"
               src={trustCommunityImage}
-              alt="ABUAD campus marketplace"
+              alt="ABUAD Market Place campus shopping"
             />
-            <div className="hero-banner-overlay">
-              <p className="hero-kicker">Campus marketplace</p>
+            <div className="jumia-banner-overlay">
+              <p className="jumia-banner-kicker">Campus deals</p>
               <h1>Shop everything on campus</h1>
-              <p>Phones, fashion, books & essentials — from verified ABUAD sellers.</p>
-
-              <form onSubmit={handleSearch} className="hero-search" role="search">
+              <p>Phones, fashion, books, essentials — from verified ABUAD sellers.</p>
+              <form onSubmit={handleSearch} className="jumia-search" role="search">
                 <Search size={18} aria-hidden="true" />
                 <input
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder={typedPlaceholder || 'Search products, brands…'}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder={typedPlaceholder || 'Search products, brands and shops'}
                   aria-label="Search the marketplace"
                 />
                 <button type="submit">Search</button>
               </form>
-
-              <div className="hero-actions">
-                <Link to="/products" className="hero-btn-primary">
+              <div className="jumia-banner-actions">
+                <Link to="/products" className="jumia-btn-primary">
                   Shop now
                 </Link>
-                <Link to="/register" className="hero-btn-outline">
+                <Link to="/register" className="jumia-btn-outline">
                   Sell on ABUAD
                 </Link>
               </div>
             </div>
           </div>
+
+          <div className="jumia-hero-side">
+            <div className="jumia-promo-card">
+              <img
+                src={resolveImageUrl(
+                  heroProducts[0]?.primary_image || heroProducts[0]?.image_url
+                )}
+                alt={heroProducts[0]?.name || 'Featured product'}
+                onError={(e) => {
+                  e.currentTarget.src = trustCommunityImage;
+                }}
+              />
+              <div>
+                <span>Top pick</span>
+                <strong>{heroProducts[0]?.name || 'Featured today'}</strong>
+                <p>
+                  ₦
+                  {Number(
+                    heroProducts[0]?.base_price || heroProducts[0]?.price || 0
+                  ).toLocaleString()}
+                </p>
+              </div>
+            </div>
+            <div className="jumia-promo-card">
+              <img
+                src={resolveImageUrl(
+                  heroProducts[1]?.primary_image || heroProducts[1]?.image_url
+                )}
+                alt={heroProducts[1]?.name || 'New arrival'}
+                onError={(e) => {
+                  e.currentTarget.src = trustCommunityImage;
+                }}
+              />
+              <div>
+                <span>New</span>
+                <strong>{heroProducts[1]?.name || 'New arrival'}</strong>
+                <p>
+                  ₦
+                  {Number(
+                    heroProducts[1]?.base_price || heroProducts[1]?.price || 0
+                  ).toLocaleString()}
+                </p>
+              </div>
+            </div>
+            <div className="jumia-video-card">
+              <img
+                src={trustCommunityImage}
+                alt="Students discovering products at ABUAD Market Place"
+                loading="lazy"
+              />
+              <div className="jumia-video-label">
+                <Zap size={14} />
+                Live campus market
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="trust-strip">
+        <div className="jumia-trust-row">
           <div>
-            <ShieldCheck size={16} />
-            <span>Secure checkout</span>
+            <ShieldCheck size={18} />
+            <span>Secure Paystack checkout</span>
           </div>
           <div>
-            <BadgeCheck size={16} />
-            <span>Verified sellers</span>
+            <BadgeCheck size={18} />
+            <span>Verified campus sellers</span>
           </div>
           <div>
-            <MessageCircleMore size={16} />
+            <MessageCircleMore size={18} />
             <span>Chat with shops</span>
           </div>
           <div>
-            <Star size={16} />
+            <Star size={18} />
             <span>Trusted by students</span>
           </div>
         </div>
       </section>
 
-      {/* Categories */}
-      <section id="categories" className="home-section">
+      <section id="categories" className="home-section category-section">
+        <div className="section-glow section-glow-gold" />
         <CategoryGrid />
       </section>
 
-      {/* Featured products */}
-      <section className="home-section">
+      <section className="home-section product-section">
         <div className="section-heading-row">
           <div>
-            <p className="eyebrow">Top deals</p>
+            <p className="luxury-eyebrow">
+              <span />
+              Top deals
+            </p>
             <h2>Recommended for you</h2>
           </div>
           <Link to="/products" className="text-link-gold">
-            Shop all
-            <ArrowRight size={15} aria-hidden="true" />
+            Shop all products
+            <ArrowRight size={17} aria-hidden="true" />
           </Link>
         </div>
 
         {loading ? (
-          <div className="product-grid" aria-label="Loading products">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="product-skeleton">
+          <div className="luxury-product-grid" aria-label="Loading products">
+            {[0, 1, 2, 3].map((item) => (
+              <div key={item} className="luxury-skeleton">
                 <span />
               </div>
             ))}
@@ -199,13 +260,13 @@ const Home = () => {
           </div>
         ) : featuredProducts.length === 0 ? (
           <div className="catalog-message">
-            <Sparkles size={22} aria-hidden="true" />
-            <p>The collection is being curated</p>
+            <Sparkles size={24} aria-hidden="true" />
+            <p>The collection is being curated.</p>
             <span>New listings will appear as vendors publish them.</span>
           </div>
         ) : (
-          <div className="product-grid">
-            {featuredProducts.slice(0, 8).map((product) => (
+          <div className="luxury-product-grid">
+            {featuredProducts.slice(0, 4).map((product) => (
               <ProductCard key={product.id || product.slug} product={product} />
             ))}
           </div>
@@ -214,31 +275,36 @@ const Home = () => {
 
       <VendorUpdatesFeed />
 
-      {/* Trust / experience */}
       <section className="experience-section">
         <div className="experience-copy">
-          <p className="eyebrow">Built on trust</p>
+          <p className="luxury-eyebrow">
+            <span />
+            Built on trust
+          </p>
           <h2>
             Simple shopping.
             <br />
             Real connections.
           </h2>
           <p>
-            Protected payments, verified sellers, and direct chat — so buying and selling on
-            campus stays clear and confident.
+            Protected payments, verified sellers, and direct chat—so buying and selling on campus
+            stays clear and confident.
           </p>
           <Link to="/register" className="text-link-gold">
             Start your journey
-            <ArrowRight size={15} aria-hidden="true" />
+            <ArrowRight size={17} aria-hidden="true" />
           </Link>
         </div>
 
-        <div className="experience-grid">
+        <div
+          className="experience-grid"
+          style={{ '--trust-background': `url(${trustCommunityImage})` }}
+        >
           {features.map(({ Icon, title, copy, number }) => (
             <article key={title} className="experience-card">
               <span className="experience-number">{number}</span>
               <div className="experience-icon">
-                <Icon size={18} aria-hidden="true" />
+                <Icon size={20} aria-hidden="true" />
               </div>
               <h3>{title}</h3>
               <p>{copy}</p>
@@ -247,14 +313,17 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Closing CTA */}
       <section className="closing-cta">
-        <p className="eyebrow">Your marketplace</p>
-        <h2>Find something extraordinary</h2>
+        <div className="closing-glow" />
+        <p className="luxury-eyebrow">
+          <span />
+          Your marketplace, reimagined
+        </p>
+        <h2>Find something extraordinary.</h2>
         <p>Thousands of useful finds. One effortless experience.</p>
-        <Link to="/products" className="btn btn-gold">
+        <Link to="/products" className="button-gold">
           Start exploring
-          <ArrowRight size={16} aria-hidden="true" />
+          <ArrowRight size={17} aria-hidden="true" />
         </Link>
       </section>
     </div>
