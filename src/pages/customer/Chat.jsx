@@ -8,6 +8,7 @@ import MessageBubble from '../../components/chat/MessageBubble';
 import ChatComposer from '../../components/chat/ChatComposer';
 import ChatShell from '../../components/chat/ChatShell';
 import { getErrorMessage } from '../../utils/errors';
+import { Trash2 } from 'lucide-react';
 
 const CustomerChat = () => {
   const { user } = useAuth();
@@ -26,7 +27,7 @@ const CustomerChat = () => {
   const activeIdRef = useRef(null);
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  const { e2eReady, e2eError, encryptOutgoing, decryptIncoming, decryptHistory } = useE2EChat(user);
+  const { e2eError, encryptOutgoing, decryptIncoming, decryptHistory } = useE2EChat(user);
 
   const handleSocketMessage = useCallback(
     (msg) => {
@@ -275,7 +276,7 @@ const CustomerChat = () => {
     try {
       await deliverPayload(activeConversation.id, { message: body, message_type: 'text' });
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to send the message.');
+      setError(getErrorMessage(err, 'Failed to send the message.'));
     }
   };
 
@@ -298,7 +299,7 @@ const CustomerChat = () => {
     try {
       await deliverPayload(activeConversation.id, mediaPayload);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to send media.');
+      setError(getErrorMessage(err, 'Failed to send media.'));
     }
   };
 
@@ -316,6 +317,22 @@ const CustomerChat = () => {
     if (conv?.id) fetchMessages(conv.id);
   };
 
+  const deleteConversation = async (conversation) => {
+    if (!window.confirm('Delete this conversation and its messages?')) return;
+    try {
+      await api.delete('/chat/delete_conversation.php', {
+        data: { conversation_id: conversation.id },
+      });
+      setConversations((current) => current.filter((item) => item.id !== conversation.id));
+      if (activeConversation?.id === conversation.id) {
+        setActiveConversation(null);
+        setMessages([]);
+      }
+    } catch (err) {
+      setError(getErrorMessage(err, 'Could not delete this conversation.'));
+    }
+  };
+
   return (
     <ChatShell
       title="Messages"
@@ -327,16 +344,6 @@ const CustomerChat = () => {
       activeSubtitle="Vendor · encrypted chat"
       activeAvatarLetter={activeTitle}
       alert={error || lastError || e2eError || null}
-      statusPills={
-        <>
-          <span className={`chat-pill ${e2eReady ? 'chat-pill-on' : ''}`}>
-            {e2eReady ? 'E2E on' : 'E2E…'}
-          </span>
-          <span className={`chat-pill ${connected ? 'chat-pill-live' : 'chat-pill-wait'}`}>
-            {connected ? 'Live' : 'Connecting…'}
-          </span>
-        </>
-      }
       listHeader={
         <div className="customer-chat-sidebar-head luxury-chat-sidebar-head">
           <h2>Chats</h2>
@@ -369,24 +376,36 @@ const CustomerChat = () => {
               [conv.vendor_first_name, conv.vendor_last_name].filter(Boolean).join(' ') ||
               'Approved ABUAD shop';
             return (
-              <button
-                type="button"
+              <div
                 key={conv.id}
-                onClick={() => openThread(conv)}
                 className={`customer-chat-conversation luxury-chat-item ${
                   activeConversation?.id === conv.id ? 'active' : ''
                 }`}
               >
-                <span className="chat-avatar" aria-hidden="true">
-                  {title.charAt(0).toUpperCase()}
-                </span>
-                <span className="chat-item-copy">
-                  <span className="chat-item-name">{title}</span>
-                  <span className="chat-item-time">
-                    {conv.updated_at ? new Date(conv.updated_at).toLocaleString() : ''}
+                <button
+                  type="button"
+                  className="chat-conversation-open"
+                  onClick={() => openThread(conv)}
+                >
+                  <span className="chat-avatar" aria-hidden="true">
+                    {title.charAt(0).toUpperCase()}
                   </span>
-                </span>
-              </button>
+                  <span className="chat-item-copy">
+                    <span className="chat-item-name">{title}</span>
+                    <span className="chat-item-time">
+                      {conv.updated_at ? new Date(conv.updated_at).toLocaleString() : ''}
+                    </span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="chat-delete-btn"
+                  onClick={() => deleteConversation(conv)}
+                  aria-label={`Delete chat with ${title}`}
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
             );
           })
         )

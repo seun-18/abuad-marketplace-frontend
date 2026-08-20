@@ -21,7 +21,7 @@ const DashboardHeader = () => {
         <p className="dashboard-header-name">{displayName}</p>
       </div>
       <div className="flex items-center gap-2">
-<NotificationBell />
+        <NotificationBell />
         <div className="dashboard-avatar">{initials}</div>
         <button
           type="button"

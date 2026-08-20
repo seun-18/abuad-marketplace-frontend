@@ -1,6 +1,5 @@
 import {
   ArrowUpRight,
-  BadgeCheck,
   Banknote,
   Box,
   Eye,
@@ -32,6 +31,7 @@ const VendorDashboard = () => {
     recent_orders: [],
   });
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     api
@@ -39,7 +39,10 @@ const VendorDashboard = () => {
       .then((response) => {
         if (response.data.success) setMetrics(response.data.data);
       })
-      .catch((error) => console.error('Failed to load vendor dashboard:', error))
+      .catch((error) => {
+        console.error('Failed to load vendor dashboard:', error);
+        setErrorMessage(error.response?.data?.message || 'Could not load your store dashboard.');
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -85,14 +88,15 @@ const VendorDashboard = () => {
           <h1>{profile.shop_name || 'Your store'}, at a glance.</h1>
           <p>Sales, audience growth, fulfilment, and the signals that matter today.</p>
         </div>
-        <div className="dashboard-verification">
-          <BadgeCheck size={17} aria-hidden="true" />
+        <div className="dashboard-verification dashboard-location-note">
           <span>
-            <strong>Approved vendor</strong>
+            <strong>Store pickup</strong>
             {profile.pickup_location_name || 'Campus pickup point not set'}
           </span>
         </div>
       </div>
+
+      {errorMessage && <div className="dashboard-alert dashboard-alert-error">{errorMessage}</div>}
 
       <div className="dashboard-stat-grid">
         {statCards.map(({ label, value, detail, Icon, tone }) => (

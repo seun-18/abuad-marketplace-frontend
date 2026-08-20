@@ -1,4 +1,4 @@
-import { MessageCircleMore, RefreshCw, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, MessageCircleMore, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
@@ -40,7 +40,7 @@ const VendorChats = () => {
     [appendMessage]
   );
 
-  const { connected, joinConversation } = useChatSocket({
+  const { joinConversation } = useChatSocket({
     token,
     onMessage: handleSocketMessage,
     enabled: Boolean(user && user.role === 'super_admin'),
@@ -109,6 +109,19 @@ const VendorChats = () => {
     setTab('chats');
   };
 
+  const deleteConversation = async (conversation) => {
+    if (!window.confirm('Delete this vendor conversation and its messages?')) return;
+    try {
+      await api.delete('/chat/delete_conversation.php', {
+        data: { conversation_id: conversation.id },
+      });
+      setConversations((current) => current.filter((item) => item.id !== conversation.id));
+      if (activeConversation?.id === conversation.id) setActiveConversation(null);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not delete this conversation.');
+    }
+  };
+
   const startChatWithVendor = async (vendor) => {
     const vendorId = vendor.vendor_id || vendor.id;
     setStartingId(vendorId);
@@ -147,7 +160,7 @@ const VendorChats = () => {
         conversation_id: activeConversation.id,
         ...payload,
       });
-      if (res.data?.data) appendMessage(res.data.data);
+      if (res.data?.data?.message) appendMessage(res.data.data.message);
       else fetchMessages(activeConversation.id);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to send message.');
@@ -170,28 +183,44 @@ const VendorChats = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`chat-pill ${connected ? 'chat-pill-live' : 'chat-pill-wait'}`}>
-            {connected ? 'Live' : 'Connecting…'}
-          </span>
-          <button type="button" className="dashboard-header-button" onClick={() => { fetchConversations(); fetchVendors(); }}>
+          <button
+            type="button"
+            className="dashboard-header-button"
+            onClick={() => {
+              fetchConversations();
+              fetchVendors();
+            }}
+          >
             <RefreshCw size={16} />
           </button>
         </div>
       </div>
 
-      {error && <div className="dashboard-alert">{error}</div>}
+      {error && <div className="dashboard-alert dashboard-alert-error">{error}</div>}
 
       <div className="flex flex-wrap gap-2">
-        <button type="button" className={`chat-tab-btn ${tab === 'chats' ? 'active' : ''}`} onClick={() => setTab('chats')}>
+        <button
+          type="button"
+          className={`chat-tab-btn ${tab === 'chats' ? 'active' : ''}`}
+          onClick={() => setTab('chats')}
+        >
           Open chats ({conversations.length})
         </button>
-        <button type="button" className={`chat-tab-btn ${tab === 'vendors' ? 'active' : ''}`} onClick={() => setTab('vendors')}>
+        <button
+          type="button"
+          className={`chat-tab-btn ${tab === 'vendors' ? 'active' : ''}`}
+          onClick={() => setTab('vendors')}
+        >
           All vendors ({vendors.length})
         </button>
       </div>
 
-      <div className="customer-chat-shell luxury-chat-shell" style={{ minHeight: '28rem' }}>
-        <aside className="customer-chat-sidebar luxury-chat-sidebar" style={{ width: 'min(40%, 22rem)' }}>
+      <div
+        className={`customer-chat-shell luxury-chat-shell admin-vendor-chat-shell ${
+          activeConversation ? 'admin-chat-thread-open' : ''
+        }`}
+      >
+        <aside className="customer-chat-sidebar luxury-chat-sidebar admin-vendor-chat-sidebar">
           {tab === 'vendors' ? (
             <div className="luxury-chat-list">
               {vendors.length === 0 ? (
@@ -203,7 +232,11 @@ const VendorChats = () => {
                     [v.first_name, v.last_name].filter(Boolean).join(' ') ||
                     `Vendor #${v.vendor_id}`;
                   return (
-                    <div key={v.vendor_id} className="luxury-chat-item" style={{ cursor: 'default' }}>
+                    <div
+                      key={v.vendor_id}
+                      className="luxury-chat-item"
+                      style={{ cursor: 'default' }}
+                    >
                       <span className="chat-avatar">{name.charAt(0).toUpperCase()}</span>
                       <span className="chat-item-copy min-w-0 flex-1">
                         <span className="chat-item-name">{name}</span>
@@ -231,36 +264,63 @@ const VendorChats = () => {
               {loading ? (
                 <p className="chat-empty-hint">Loading…</p>
               ) : conversations.length === 0 ? (
-                <p className="chat-empty-hint">No chats yet. Open “All vendors” and message someone.</p>
+                <p className="chat-empty-hint">
+                  No chats yet. Open “All vendors” and message someone.
+                </p>
               ) : (
                 conversations.map((conv) => (
-                  <button
-                    type="button"
+                  <div
                     key={conv.id}
                     className={`customer-chat-conversation luxury-chat-item ${
                       activeConversation?.id === conv.id ? 'active' : ''
                     }`}
-                    onClick={() => selectConversation(conv)}
                   >
-                    <span className="chat-avatar">{titleFor(conv).charAt(0).toUpperCase()}</span>
-                    <span className="chat-item-copy">
-                      <span className="chat-item-name">{titleFor(conv)}</span>
-                      <span className="chat-item-time">
-                        {conv.updated_at ? new Date(conv.updated_at).toLocaleString() : ''}
+                    <button
+                      type="button"
+                      className="chat-conversation-open"
+                      onClick={() => selectConversation(conv)}
+                    >
+                      <span className="chat-avatar">{titleFor(conv).charAt(0).toUpperCase()}</span>
+                      <span className="chat-item-copy">
+                        <span className="chat-item-name">{titleFor(conv)}</span>
+                        <span className="chat-item-time">
+                          {conv.updated_at ? new Date(conv.updated_at).toLocaleString() : ''}
+                        </span>
                       </span>
-                    </span>
-                  </button>
+                    </button>
+                    <button
+                      type="button"
+                      className="chat-delete-btn"
+                      onClick={() => deleteConversation(conv)}
+                      aria-label={`Delete chat with ${titleFor(conv)}`}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 ))
               )}
             </div>
           )}
         </aside>
 
-        <section className="customer-chat-thread luxury-chat-thread" style={{ display: 'flex' }}>
+        <section className="customer-chat-thread luxury-chat-thread admin-vendor-chat-thread">
           {activeConversation ? (
             <>
               <header className="customer-chat-thread-head luxury-chat-thread-head">
-                <div className="chat-avatar chat-avatar-lg">{titleFor(activeConversation).charAt(0).toUpperCase()}</div>
+                <button
+                  type="button"
+                  className="chat-back-btn admin-chat-back"
+                  onClick={() => {
+                    setActiveConversation(null);
+                    setMessages([]);
+                  }}
+                  aria-label="Back to vendor chats"
+                >
+                  <ArrowLeft size={18} />
+                </button>
+                <div className="chat-avatar chat-avatar-lg">
+                  {titleFor(activeConversation).charAt(0).toUpperCase()}
+                </div>
                 <div className="min-w-0 flex-1">
                   <h3>{titleFor(activeConversation)}</h3>
                   <p>
@@ -289,7 +349,7 @@ const VendorChats = () => {
               />
             </>
           ) : (
-            <div className="luxury-chat-placeholder" style={{ display: 'flex' }}>
+            <div className="luxury-chat-placeholder">
               <MessageCircleMore size={28} />
               <p>Select a chat or message a vendor</p>
               <span>Use the “All vendors” tab to start a conversation anytime.</span>

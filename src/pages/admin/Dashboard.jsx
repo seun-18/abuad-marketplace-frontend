@@ -1,6 +1,5 @@
 import {
   ArrowUpRight,
-  BadgeCheck,
   Banknote,
   CheckCircle2,
   Clock3,
@@ -53,9 +52,11 @@ const AdminDashboard = () => {
   const [pendingVendors, setPendingVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [approvingId, setApprovingId] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const fetchAdminData = async () => {
     try {
+      setErrorMessage('');
       const [metricsResponse, vendorsResponse] = await Promise.all([
         api.get('/admin/dashboard.php'),
         api.get('/admin/vendors.php'),
@@ -68,6 +69,7 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       console.error('Failed to load admin overview:', error);
+      setErrorMessage(error.response?.data?.message || 'Could not load the admin dashboard.');
     } finally {
       setLoading(false);
     }
@@ -79,6 +81,7 @@ const AdminDashboard = () => {
 
   const approveVendor = async (vendorId) => {
     setApprovingId(vendorId);
+    setErrorMessage('');
     try {
       const response = await api.put('/admin/vendors.php', {
         vendor_id: vendorId,
@@ -87,12 +90,13 @@ const AdminDashboard = () => {
       if (response.data.success) await fetchAdminData();
     } catch (error) {
       console.error('Vendor approval failed:', error);
+      setErrorMessage(error.response?.data?.message || 'Could not approve this vendor.');
     } finally {
       setApprovingId(null);
     }
   };
 
-  if (loading) return <div className="dashboard-loading">Loading platform intelligence…</div>;
+  if (loading) return <div className="dashboard-loading">Loading platform overview…</div>;
 
   const statCards = [
     {
@@ -131,10 +135,15 @@ const AdminDashboard = () => {
             Revenue, vendor payouts, and who was paid — live overview for today.
           </p>
         </div>
-        <Link to="/admin/payouts" className="chat-start-btn chat-tab-start inline-flex items-center gap-1">
+        <Link
+          to="/admin/payouts"
+          className="chat-start-btn chat-tab-start inline-flex items-center gap-1"
+        >
           Open payouts <ArrowUpRight size={14} />
         </Link>
       </div>
+
+      {errorMessage && <div className="dashboard-alert dashboard-alert-error">{errorMessage}</div>}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {statCards.map((card) => {
@@ -159,7 +168,10 @@ const AdminDashboard = () => {
             <p className="dashboard-kicker">Payouts today</p>
             <h2 className="text-lg font-semibold">Who got paid & who requested</h2>
           </div>
-          <Link to="/admin/payouts" className="text-sm font-semibold text-amber-600 hover:underline">
+          <Link
+            to="/admin/payouts"
+            className="text-sm font-semibold text-amber-600 hover:underline"
+          >
             Manage all →
           </Link>
         </div>
@@ -255,9 +267,7 @@ const AdminDashboard = () => {
                   <li key={row.payout_id}>
                     <div>
                       <strong>{vendorLabel(row)}</strong>
-                      <span>
-                        {[row.first_name, row.last_name].filter(Boolean).join(' ')}
-                      </span>
+                      <span>{[row.first_name, row.last_name].filter(Boolean).join(' ')}</span>
                     </div>
                     <div className="monitor-amount">
                       <strong>{money(row.amount)}</strong>
@@ -329,7 +339,10 @@ const AdminDashboard = () => {
               ))}
             </ul>
           )}
-          <Link to="/admin/vendors" className="text-sm font-semibold text-amber-600 hover:underline">
+          <Link
+            to="/admin/vendors"
+            className="text-sm font-semibold text-amber-600 hover:underline"
+          >
             All vendors →
           </Link>
         </section>
@@ -338,7 +351,7 @@ const AdminDashboard = () => {
       <section className="dashboard-panel space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Recent orders</h2>
-          <BadgeCheck size={16} className="opacity-40" />
+          <PackageCheck size={16} className="opacity-40" />
         </div>
         {(metrics.recent_orders || []).length === 0 ? (
           <p className="dashboard-empty text-sm">No orders yet.</p>
@@ -355,7 +368,10 @@ const AdminDashboard = () => {
               </thead>
               <tbody>
                 {metrics.recent_orders.map((order) => (
-                  <tr key={order.order_number} className="border-t border-black/5 dark:border-white/10">
+                  <tr
+                    key={order.order_number}
+                    className="border-t border-black/5 dark:border-white/10"
+                  >
                     <td className="py-2 pr-3 font-medium">{order.order_number}</td>
                     <td className="py-2 pr-3">
                       {[order.first_name, order.last_name].filter(Boolean).join(' ')}

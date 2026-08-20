@@ -1,4 +1,4 @@
-import { Mic, Play } from 'lucide-react';
+import { Mic } from 'lucide-react';
 import React from 'react';
 import { resolveImageUrl } from '../../utils/imageUrl';
 

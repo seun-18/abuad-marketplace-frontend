@@ -1,14 +1,16 @@
 import {
   ArrowRight,
-  BadgeCheck,
   MessageCircleMore,
+  PackageOpen,
   ShieldCheck,
-  Sparkles,
+  UserRoundCheck,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import trustCommunityImage from '../../assets/campus-hero.jpg';
+import campusStudentsImage from '../../assets/campus-students.jpg';
+import campusGadgetsImage from '../../assets/campus-gadgets.jpg';
 import ProductCard from '../../components/ProductCard';
 import CategoryBar from '../../components/filters/CategoryBar';
 import EscrowBanner from '../../components/trust/EscrowBanner';
@@ -56,7 +58,7 @@ const Home = () => {
       copy: 'Pay safely. Release funds only when you are satisfied with the item.',
     },
     {
-      Icon: BadgeCheck,
+      Icon: UserRoundCheck,
       title: 'Verified students',
       copy: 'Buy and sell with verified ABUAD students around campus.',
     },
@@ -73,11 +75,14 @@ const Home = () => {
       <section className="campus-hero">
         <div className="campus-hero-banner">
           <img src={trustCommunityImage} alt="ABUAD campus marketplace" />
+          <div className="campus-hero-collage" aria-hidden="true">
+            <img src={campusStudentsImage} alt="" />
+            <img src={campusGadgetsImage} alt="" />
+          </div>
           <div className="campus-hero-content">
+            <span className="campus-hero-kicker">ABUAD student marketplace</span>
             <h1>Shop campus-to-campus</h1>
-            <p>
-              Textbooks, gadgets, fashion & more — from verified ABUAD students near you.
-            </p>
+            <p>Textbooks, gadgets, fashion & more — from verified ABUAD students near you.</p>
           </div>
         </div>
       </section>
@@ -120,7 +125,7 @@ const Home = () => {
         <div className="product-grid">
           <div className="catalog-message">
             <div className="empty-icon">
-              <Sparkles size={28} aria-hidden="true" />
+              <PackageOpen size={28} aria-hidden="true" />
             </div>
             <p>No listings yet</p>
             <span>New campus finds will appear as students publish them.</span>
@@ -165,7 +170,11 @@ const Home = () => {
         </p>
         <h2>List an item in minutes</h2>
         <p>Reach thousands of students across ABUAD hostels and faculties.</p>
-        <Link to="/register" className="btn btn-primary" style={{ background: '#fff', color: '#064e3b' }}>
+        <Link
+          to="/register"
+          className="btn btn-primary"
+          style={{ background: '#fff', color: '#064e3b' }}
+        >
           Open a campus store
           <ArrowRight size={16} aria-hidden="true" />
         </Link>

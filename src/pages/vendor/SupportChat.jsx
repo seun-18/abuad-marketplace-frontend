@@ -1,4 +1,4 @@
-import { Headphones, MessageCircleMore, Plus, ShieldCheck } from 'lucide-react';
+import { Headphones, MessageCircleMore, Plus, ShieldCheck, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
@@ -15,6 +15,7 @@ const VendorSupportChat = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const messagesEndRef = useRef(null);
+  const activeConversationRef = useRef(null);
 
   const fetchMessages = useCallback(async (conversationId) => {
     try {
@@ -34,8 +35,17 @@ const VendorSupportChat = () => {
       const supportChats = list.filter((conversation) => conversation.type === 'vendor_admin');
       setConversations(supportChats);
       if (supportChats.length > 0) {
-        setActiveConversation((current) => current || supportChats[0]);
-        await fetchMessages(supportChats[0].id);
+        const selected =
+          supportChats.find(
+            (conversation) => Number(conversation.id) === Number(activeConversationRef.current?.id)
+          ) || supportChats[0];
+        setActiveConversation(selected);
+        activeConversationRef.current = selected;
+        await fetchMessages(selected.id);
+      } else {
+        setActiveConversation(null);
+        activeConversationRef.current = null;
+        setMessages([]);
       }
     } catch (requestError) {
       setError(requestError.response?.data?.message || 'Could not load administrator support.');
@@ -76,12 +86,30 @@ const VendorSupportChat = () => {
           updated_at: new Date().toISOString(),
         };
         setActiveConversation(conversation);
+        activeConversationRef.current = conversation;
         await fetchMessages(conversationId);
       }
     } catch (requestError) {
       setError(requestError.response?.data?.message || 'Could not start administrator support.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteConversation = async (conversation) => {
+    if (!window.confirm('Delete this support conversation and its messages?')) return;
+    try {
+      await api.delete('/chat/delete_conversation.php', {
+        data: { conversation_id: conversation.id },
+      });
+      setConversations((current) => current.filter((item) => item.id !== conversation.id));
+      if (activeConversation?.id === conversation.id) {
+        setActiveConversation(null);
+        activeConversationRef.current = null;
+        setMessages([]);
+      }
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || 'Could not delete this support chat.');
     }
   };
 
@@ -116,9 +144,14 @@ const VendorSupportChat = () => {
             Send text, screenshots, product photos, or a voice note to the ABUAD marketplace team.
           </p>
         </div>
-        <button type="button" className="dashboard-action-button" onClick={startNewChat}>
+        <button
+          type="button"
+          className="dashboard-action-button"
+          onClick={startNewChat}
+          disabled={loading}
+        >
           <Plus size={16} />
-          Start support chat
+          {loading ? 'Opening support…' : 'Start support chat'}
         </button>
       </div>
 
@@ -137,25 +170,37 @@ const VendorSupportChat = () => {
               <p>{loading ? 'Loading support...' : 'No support conversation yet.'}</p>
             ) : (
               conversations.map((conversation) => (
-                <button
-                  type="button"
+                <div
                   key={conversation.id}
-                  className={
+                  className={`support-chat-conversation-row ${
                     Number(activeConversation?.id) === Number(conversation.id) ? 'active' : ''
-                  }
-                  onClick={() => {
-                    setActiveConversation(conversation);
-                    fetchMessages(conversation.id);
-                  }}
+                  }`}
                 >
-                  <span>ABUAD Market Place support</span>
-                  <small>Platform administrator</small>
-                  <time>
-                    {conversation.updated_at
-                      ? new Date(conversation.updated_at).toLocaleDateString()
-                      : ''}
-                  </time>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveConversation(conversation);
+                      activeConversationRef.current = conversation;
+                      fetchMessages(conversation.id);
+                    }}
+                  >
+                    <span>ABUAD Market Place support</span>
+                    <small>Platform administrator</small>
+                    <time>
+                      {conversation.updated_at
+                        ? new Date(conversation.updated_at).toLocaleDateString()
+                        : ''}
+                    </time>
+                  </button>
+                  <button
+                    type="button"
+                    className="chat-delete-btn"
+                    onClick={() => deleteConversation(conversation)}
+                    aria-label="Delete support chat"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
               ))
             )}
           </div>

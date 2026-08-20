@@ -1,22 +1,34 @@
-import { Image, Layers3, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Layers3, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import api from '../../api/axios';
+import LocalImagePicker from '../../components/LocalImagePicker';
 import { resolveImageUrl } from '../../utils/imageUrl';
 
 const emptyForm = {
   name: '',
   parent_id: '',
   description: '',
-  image_url: '',
 };
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState(emptyForm);
+  const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [feedback, setFeedback] = useState('');
+  const imagePreview = useMemo(
+    () => (imageFile ? URL.createObjectURL(imageFile) : ''),
+    [imageFile]
+  );
+
+  useEffect(
+    () => () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    },
+    [imagePreview]
+  );
 
   const fetchCategories = async () => {
     try {
@@ -39,12 +51,21 @@ const AdminCategories = () => {
     setError('');
     setFeedback('');
     try {
+      let imageUrl = '';
+      if (imageFile) {
+        const upload = new FormData();
+        upload.append('image', imageFile);
+        const uploadResponse = await api.post('/categories/upload_image.php', upload);
+        imageUrl = uploadResponse.data.data?.url || '';
+      }
       const response = await api.post('/categories/index.php', {
         ...form,
         parent_id: form.parent_id ? Number(form.parent_id) : null,
+        image_url: imageUrl,
       });
       if (response.data.success) {
         setForm(emptyForm);
+        setImageFile(null);
         setFeedback('Category created and available to approved vendors.');
         await fetchCategories();
       }
@@ -132,22 +153,17 @@ const AdminCategories = () => {
               }
             />
           </label>
-          <label>
-            <span>Cover image URL</span>
-            <div className="category-image-input">
-              <Image size={16} />
-              <input
-                type="url"
-                value={form.image_url}
-                placeholder="https://…"
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, image_url: event.target.value }))
-                }
-              />
-            </div>
-          </label>
+          <LocalImagePicker
+            key={imageFile ? imageFile.name : 'empty'}
+            label="Cover image from your device"
+            hint="JPG, PNG or WebP · max 5 MB"
+            accept="image/jpeg,image/png,image/webp"
+            file={imageFile}
+            previewUrl={imagePreview}
+            onChange={setImageFile}
+          />
           <button type="submit" disabled={submitting}>
-            {submitting ? 'Creating…' : 'Create category'}
+            {submitting ? 'Uploading and creating…' : 'Create category'}
           </button>
         </form>
 

@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import api from '../../api/axios';
 
 /**
- * Professional composer: text + image attach + hold-to-record voice note.
+ * Message composer for text, photo/video attachments, and voice notes.
  */
 const ChatComposer = ({ conversationId, disabled, onSendText, onSendMediaMessage }) => {
   const [text, setText] = useState('');
@@ -166,7 +166,7 @@ const ChatComposer = ({ conversationId, disabled, onSendText, onSendMediaMessage
         />
         <button
           type="button"
-          title="Send image"
+          title="Attach a photo or video"
           disabled={disabled || uploading || !conversationId || recording}
           onClick={() => fileRef.current?.click()}
           className="chat-composer-icon"

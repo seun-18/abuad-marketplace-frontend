@@ -1,4 +1,4 @@
-import { Image, Megaphone, Send, Trash2, Upload } from 'lucide-react';
+import { Megaphone, Send, Trash2, Upload } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 
@@ -125,7 +125,9 @@ const VendorUpdates = () => {
         </label>
 
         <label className="local-image-upload">
-          <span className="text-xs font-semibold opacity-60">Photo from your device (optional)</span>
+          <span className="text-xs font-semibold opacity-60">
+            Photo from your device (optional)
+          </span>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
@@ -141,7 +143,11 @@ const VendorUpdates = () => {
           {imageFile && <small className="local-upload-file">{imageFile.name}</small>}
         </label>
 
-        <button type="submit" disabled={submitting} className="chat-start-btn inline-flex items-center gap-2">
+        <button
+          type="submit"
+          disabled={submitting}
+          className="chat-start-btn inline-flex items-center gap-2"
+        >
           <Send size={16} />
           {submitting ? 'Publishing…' : 'Publish update'}
         </button>
