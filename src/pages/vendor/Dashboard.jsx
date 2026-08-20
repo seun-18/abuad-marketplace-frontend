@@ -86,7 +86,7 @@ const VendorDashboard = () => {
           <p>Sales, audience growth, fulfilment, and the signals that matter today.</p>
         </div>
         <div className="dashboard-verification">
-          <BadgeCheck size={17} />
+          <BadgeCheck size={17} aria-hidden="true" />
           <span>
             <strong>Approved vendor</strong>
             {profile.pickup_location_name || 'Campus pickup point not set'}
@@ -97,10 +97,10 @@ const VendorDashboard = () => {
       <div className="dashboard-stat-grid">
         {statCards.map(({ label, value, detail, Icon, tone }) => (
           <article key={label} className={`dashboard-stat-card dashboard-stat-${tone}`}>
-            <div>
-              <p>{label}</p>
-              <Icon size={18} />
+            <div className="stat-icon">
+              <Icon size={18} aria-hidden="true" />
             </div>
+            <p>{label}</p>
             <strong>{value}</strong>
             <span>{detail}</span>
           </article>
@@ -137,8 +137,11 @@ const VendorDashboard = () => {
                   <span>{label}</span>
                   <strong>{Number(value).toLocaleString()}</strong>
                 </p>
-                <div>
-                  <span style={{ width: `${Math.min(100, (value / maximum) * 100)}%` }} />
+                <div className="bar-track">
+                  <span
+                    className="bar-fill"
+                    style={{ width: `${Math.min(100, (Number(value) / Number(maximum)) * 100)}%` }}
+                  />
                 </div>
               </div>
             ))}

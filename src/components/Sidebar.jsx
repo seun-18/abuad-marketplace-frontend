@@ -78,7 +78,7 @@ const Sidebar = ({ role }) => {
 
       <NavLink
         to="/"
-        className="dashboard-market-link mt-5 hidden items-center gap-2 px-3 pt-5 text-sm font-medium md:flex"
+        className="dashboard-market-link mt-4 flex items-center gap-2 px-3 pt-4 text-sm font-medium"
       >
         <Store size={16} aria-hidden="true" />
         View marketplace
