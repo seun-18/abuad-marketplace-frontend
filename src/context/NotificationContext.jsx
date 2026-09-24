@@ -1,4 +1,12 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useAuth } from './AuthContext';
 import { useChatSocket } from '../hooks/useChatSocket';
 
@@ -126,7 +134,9 @@ export const NotificationProvider = ({ children }) => {
     [items, unread, markAllRead, markRead, connected, toast, clearToast]
   );
 
-  return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
+  return (
+    <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>
+  );
 };
 
 export const useNotifications = () => useContext(NotificationContext);

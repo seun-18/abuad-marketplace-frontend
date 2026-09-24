@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +7,6 @@ import { useE2EChat } from '../../hooks/useE2EChat';
 import MessageBubble from '../../components/chat/MessageBubble';
 import ChatComposer from '../../components/chat/ChatComposer';
 import ChatShell from '../../components/chat/ChatShell';
-import { getErrorMessage } from '../../utils/errors';
 
 const VendorMessages = () => {
   const { user } = useAuth();
@@ -23,7 +21,7 @@ const VendorMessages = () => {
   const messagesEndRef = useRef(null);
   const activeIdRef = useRef(null);
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  const { e2eError, encryptOutgoing, decryptIncoming, decryptHistory } = useE2EChat(user);
+  const { e2eReady, e2eError, encryptOutgoing, decryptIncoming, decryptHistory } = useE2EChat(user);
 
   const handleSocketMessage = useCallback(
     (msg) => {
@@ -41,7 +39,8 @@ const VendorMessages = () => {
               if (prev.some((m) => m.id === row.id)) return prev;
               const localIdx = prev.findIndex(
                 (m) =>
-                  String(m.id).startsWith('local-') && Number(m.sender_id) === Number(row.sender_id)
+                  String(m.id).startsWith('local-') &&
+                  Number(m.sender_id) === Number(row.sender_id)
               );
               if (localIdx >= 0) {
                 const copy = [...prev];
@@ -132,23 +131,6 @@ const VendorMessages = () => {
     if (conv?.id) fetchMessages(conv.id);
   };
 
-  const deleteConversation = async (conversation) => {
-    if (!window.confirm('Delete this conversation and its messages?')) return;
-    try {
-      await api.delete('/chat/delete_conversation.php', {
-        data: { conversation_id: conversation.id },
-      });
-      setCustomerConversations((current) => current.filter((item) => item.id !== conversation.id));
-      setAdminConversations((current) => current.filter((item) => item.id !== conversation.id));
-      if (activeConversation?.id === conversation.id) {
-        setActiveConversation(null);
-        setMessages([]);
-      }
-    } catch (err) {
-      setError(getErrorMessage(err, 'Could not delete this conversation.'));
-    }
-  };
-
   const startAdminChat = async () => {
     try {
       setLoading(true);
@@ -216,7 +198,7 @@ const VendorMessages = () => {
     try {
       await deliverPayload(activeConversation.id, { message: body, message_type: 'text' });
     } catch (err) {
-      setError(getErrorMessage(err, 'Failed to send the message.'));
+      alert(err.response?.data?.message || 'Failed to send the message.');
     }
   };
 
@@ -234,7 +216,7 @@ const VendorMessages = () => {
     try {
       await deliverPayload(activeConversation.id, mediaPayload);
     } catch (err) {
-      setError(getErrorMessage(err, 'Failed to send media.'));
+      alert(err.response?.data?.message || 'Failed to send media.');
     }
   };
 
@@ -311,6 +293,16 @@ const VendorMessages = () => {
         }
         activeAvatarLetter={activeTitle}
         alert={error || lastError || e2eError || null}
+        statusPills={
+          <>
+            <span className={`chat-pill ${e2eReady ? 'chat-pill-on' : ''}`}>
+              {e2eReady ? 'E2E on' : 'E2E…'}
+            </span>
+            <span className={`chat-pill ${connected ? 'chat-pill-live' : 'chat-pill-wait'}`}>
+              {connected ? 'Live' : 'Connecting…'}
+            </span>
+          </>
+        }
         listHeader={
           <div className="customer-chat-sidebar-head luxury-chat-sidebar-head">
             <h2>{tab === 'customers' ? 'Customers' : 'Admin'}</h2>
@@ -327,36 +319,24 @@ const VendorMessages = () => {
             list.map((conv) => {
               const title = titleFor(conv);
               return (
-                <div
+                <button
+                  type="button"
                   key={conv.id}
+                  onClick={() => selectConversation(conv)}
                   className={`customer-chat-conversation luxury-chat-item ${
                     activeConversation?.id === conv.id ? 'active' : ''
                   }`}
                 >
-                  <button
-                    type="button"
-                    className="chat-conversation-open"
-                    onClick={() => selectConversation(conv)}
-                  >
-                    <span className="chat-avatar" aria-hidden="true">
-                      {title.charAt(0).toUpperCase()}
+                  <span className="chat-avatar" aria-hidden="true">
+                    {title.charAt(0).toUpperCase()}
+                  </span>
+                  <span className="chat-item-copy">
+                    <span className="chat-item-name">{title}</span>
+                    <span className="chat-item-time">
+                      {conv.updated_at ? new Date(conv.updated_at).toLocaleString() : ''}
                     </span>
-                    <span className="chat-item-copy">
-                      <span className="chat-item-name">{title}</span>
-                      <span className="chat-item-time">
-                        {conv.updated_at ? new Date(conv.updated_at).toLocaleString() : ''}
-                      </span>
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    className="chat-delete-btn"
-                    onClick={() => deleteConversation(conv)}
-                    aria-label={`Delete chat with ${title}`}
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
+                  </span>
+                </button>
               );
             })
           )

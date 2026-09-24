@@ -1,22 +1,27 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Unauthorized = () => {
-  return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
-      <h1 className="text-6xl font-extrabold text-indigo-600 mb-2">403</h1>
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
-      <p className="text-gray-600 max-w-md mb-6">
-        You don't have permission to view this page. Please contact an administrator or return home.
-      </p>
-      <Link
-        to="/"
-        className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition"
-      >
-        Back to Home
+const Unauthorized = () => (
+  <main className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center">
+    <p className="eyebrow">Access</p>
+    <h1 className="page-heading mt-2" style={{ color: 'var(--primary)' }}>
+      403
+    </h1>
+    <h2 className="mt-2 text-xl font-bold" style={{ color: 'var(--text)' }}>
+      Access denied
+    </h2>
+    <p className="mt-3 max-w-md" style={{ color: 'var(--text-muted)' }}>
+      You do not have permission to view this page. Sign in with the correct account, or return
+      home.
+    </p>
+    <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+      <Link to="/login" className="btn btn-primary">
+        Sign in
+      </Link>
+      <Link to="/" className="btn btn-outline">
+        Go home
       </Link>
     </div>
-  );
-};
+  </main>
+);
 
 export default Unauthorized;
