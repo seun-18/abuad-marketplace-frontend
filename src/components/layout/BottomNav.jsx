@@ -21,7 +21,7 @@ const BottomNav = () => {
       label: 'Orders',
     },
     {
-      to: user ? (user.role === 'vendor' ? '/vendor/dashboard' : user.role === 'super_admin' ? '/admin/dashboard' : '/customer/wishlist') : '/login',
+      to: user ? (user.role === 'vendor' ? '/vendor/dashboard' : user.role === 'super_admin' ? '/admin/dashboard' : '/customer/profile') : '/login',
       icon: User,
       label: 'Profile',
     },

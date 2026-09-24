@@ -21,6 +21,7 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import VerifyPhone from './pages/auth/VerifyPhone';
 import Wishlist from './pages/customer/Wishlist';
+import Profile from './pages/customer/Profile';
 import CustomerOrders from './pages/customer/Orders';
 import Following from './pages/customer/Following';
 import CustomerUpdates from './pages/customer/Updates';
@@ -67,6 +68,7 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/checkout/verify" element={<CheckoutVerify />} />
+            <Route path="/customer/profile" element={<Profile />} />
             <Route path="/customer/wishlist" element={<Wishlist />} />
             <Route path="/customer/orders" element={<CustomerOrders />} />
             <Route path="/customer/chat" element={<CustomerChat />} />
