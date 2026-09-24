@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, X } from 'lucide-react';
+import { Search, X, SlidersHorizontal } from 'lucide-react';
 import api from '../../api/axios';
 import ProductCard from '../../components/ProductCard';
 import CategoryBar from '../../components/filters/CategoryBar';
@@ -14,6 +14,7 @@ const Products = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState('');
   const [reloadToken, setReloadToken] = useState(0);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [category, setCategory] = useState(searchParams.get('category') || '');
@@ -71,6 +72,7 @@ const Products = () => {
     setSortBy('latest');
     setPage(1);
     setSearchParams({});
+    setFiltersOpen(false);
   };
 
   const handleCategorySelect = (slug) => {
@@ -78,39 +80,31 @@ const Products = () => {
     setPage(1);
   };
 
-  const hasActiveFilters = search || category || minPrice || maxPrice || sortBy !== 'latest';
+  const hasActiveFilters = Boolean(
+    search || category || minPrice || maxPrice || sortBy !== 'latest'
+  );
 
   return (
-    <div>
-      <div style={{ padding: '0 0.75rem', marginBottom: '0.5rem' }}>
+    <div className="catalog-page">
+      <header className="catalog-header">
         <p className="eyebrow">Catalog</p>
-        <h1 className="page-heading" style={{ marginTop: '0.2rem' }}>
-          Campus finds
-        </h1>
+        <h1 className="page-heading">Campus finds</h1>
+      </header>
+
+      <div className="catalog-category-wrap">
+        <CategoryBar activeSlug={category} onSelect={handleCategorySelect} />
       </div>
 
-      <CategoryBar activeSlug={category} onSelect={handleCategorySelect} />
-
-      <div className="products-toolbar" style={{ padding: '0 0.75rem' }}>
+      <div className="catalog-toolbar">
         <form
+          className="catalog-search-form"
           onSubmit={(e) => {
             e.preventDefault();
             setPage(1);
           }}
-          style={{ display: 'flex', gap: '0.5rem' }}
         >
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Search
-              size={16}
-              style={{
-                position: 'absolute',
-                left: '0.75rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-faint)',
-              }}
-              aria-hidden
-            />
+          <div className="catalog-search">
+            <Search size={16} aria-hidden="true" />
             <input
               type="search"
               aria-label="Search products"
@@ -120,47 +114,42 @@ const Products = () => {
                 setPage(1);
               }}
               placeholder="Search textbooks, gadgets, food..."
-              className="field"
-              style={{ paddingLeft: '2.25rem' }}
+              enterKeyHint="search"
             />
+            {search ? (
+              <button
+                type="button"
+                className="catalog-search-clear"
+                aria-label="Clear search"
+                onClick={() => {
+                  setSearch('');
+                  setPage(1);
+                }}
+              >
+                <X size={14} />
+              </button>
+            ) : null}
           </div>
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              className="btn btn-outline"
-              style={{ minWidth: '2.75rem', padding: '0 0.75rem' }}
-              aria-label="Clear filters"
-            >
-              <X size={18} />
-            </button>
-          )}
         </form>
 
-        <div className="products-filters">
-          <input
-            type="number"
-            placeholder="Min ₦"
-            aria-label="Minimum price"
-            value={minPrice}
-            onChange={(e) => {
-              setMinPrice(e.target.value);
-              setPage(1);
-            }}
-          />
-          <input
-            type="number"
-            placeholder="Max ₦"
-            aria-label="Maximum price"
-            value={maxPrice}
-            onChange={(e) => {
-              setMaxPrice(e.target.value);
-              setPage(1);
-            }}
-          />
+        <div className="catalog-toolbar-actions">
+          <button
+            type="button"
+            className={`catalog-filter-toggle ${filtersOpen || hasActiveFilters ? 'active' : ''}`}
+            onClick={() => setFiltersOpen((v) => !v)}
+            aria-expanded={filtersOpen}
+            aria-controls="catalog-filters"
+          >
+            <SlidersHorizontal size={16} aria-hidden="true" />
+            <span>Filters</span>
+          </button>
           <select
+            className="catalog-sort"
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              setPage(1);
+            }}
             aria-label="Sort by"
           >
             <option value="latest">Newest</option>
@@ -168,26 +157,76 @@ const Products = () => {
             <option value="price_desc">Price ↓</option>
             <option value="popular">Popular</option>
           </select>
+          {hasActiveFilters ? (
+            <button
+              type="button"
+              className="catalog-clear-btn"
+              onClick={handleResetFilters}
+              aria-label="Clear all filters"
+            >
+              <X size={16} />
+            </button>
+          ) : null}
+        </div>
+
+        <div
+          id="catalog-filters"
+          className={`catalog-filters-panel ${filtersOpen ? 'open' : ''}`}
+        >
+          <label className="catalog-filter-field">
+            <span>Min ₦</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder="0"
+              aria-label="Minimum price"
+              value={minPrice}
+              onChange={(e) => {
+                setMinPrice(e.target.value);
+                setPage(1);
+              }}
+            />
+          </label>
+          <label className="catalog-filter-field">
+            <span>Max ₦</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder="Any"
+              aria-label="Maximum price"
+              value={maxPrice}
+              onChange={(e) => {
+                setMaxPrice(e.target.value);
+                setPage(1);
+              }}
+            />
+          </label>
         </div>
       </div>
 
-      <div className="products-meta" style={{ padding: '0 0.75rem' }}>
+      <div className="catalog-meta">
         <span>
           {loading
             ? 'Loading…'
             : `${products.length} result${products.length === 1 ? '' : 's'}`}
         </span>
+        {category ? (
+          <button type="button" className="catalog-chip" onClick={() => handleCategorySelect('')}>
+            Category · clear
+            <X size={12} />
+          </button>
+        ) : null}
       </div>
 
-      {error && (
-        <div style={{ padding: '0 0.75rem' }}>
+      {error ? (
+        <div className="catalog-error">
           <ErrorAlert
             title="Could not load products"
             message={error}
             onRetry={() => setReloadToken((n) => n + 1)}
           />
         </div>
-      )}
+      ) : null}
 
       {loading ? (
         <div className="product-grid" aria-label="Loading">
@@ -198,22 +237,15 @@ const Products = () => {
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="product-grid">
-          <div className="catalog-message">
-            <div className="empty-icon">
-              <Search size={28} aria-hidden="true" />
-            </div>
-            <p>No items found</p>
-            <span>Try adjusting your filters or search terms</span>
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              className="btn btn-primary"
-              style={{ marginTop: '0.75rem' }}
-            >
-              Clear filters
-            </button>
+        <div className="catalog-empty">
+          <div className="empty-icon">
+            <Search size={28} aria-hidden="true" />
           </div>
+          <p>No items found</p>
+          <span>Try adjusting your filters or search terms</span>
+          <button type="button" onClick={handleResetFilters} className="btn btn-primary">
+            Clear filters
+          </button>
         </div>
       ) : (
         <div className="product-grid">
@@ -223,8 +255,8 @@ const Products = () => {
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div className="pagination">
+      {totalPages > 1 ? (
+        <nav className="pagination" aria-label="Pagination">
           <button
             type="button"
             disabled={page <= 1}
@@ -252,8 +284,8 @@ const Products = () => {
           >
             Next
           </button>
-        </div>
-      )}
+        </nav>
+      ) : null}
     </div>
   );
 };

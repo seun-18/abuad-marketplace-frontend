@@ -12,30 +12,36 @@ const AUTH_PATHS = [
   '/verify-phone',
 ];
 
+const CHAT_PATHS = ['/customer/chat'];
+const FULL_BLEED_PATHS = ['/products', '/customer/chat', '/customer/profile'];
+
 const MainLayout = () => {
   const { pathname } = useLocation();
   const isHome = pathname === '/';
-  const isAuth = AUTH_PATHS.some(
-    (p) => pathname === p || pathname.startsWith(p + '/')
-  );
+  const isAuth = AUTH_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
+  const isChat = CHAT_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
+  const isFullBleed =
+    isHome || FULL_BLEED_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
 
   if (isAuth) {
     return (
-      <div className="min-h-screen min-h-[100dvh]">
+      <div className="min-h-screen min-h-[100dvh] overflow-x-hidden">
         <Outlet />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen min-h-[100dvh] flex-col home-layout">
+    <div className="flex min-h-screen min-h-[100dvh] flex-col home-layout overflow-x-hidden">
       <CampusHeader />
       <main
-        className={`${isHome ? 'w-full flex-grow' : 'page-shell flex-grow'} main-with-bottom-nav`}
+        className={`${isFullBleed ? 'w-full flex-grow' : 'page-shell flex-grow'} main-with-bottom-nav ${
+          isChat ? 'main-chat-mode' : ''
+        }`}
       >
         <Outlet />
       </main>
-      <Footer />
+      {!isChat ? <Footer /> : null}
       <BottomNav />
     </div>
   );

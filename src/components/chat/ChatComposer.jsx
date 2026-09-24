@@ -184,9 +184,8 @@ const ChatComposer = ({ conversationId, disabled, onSendText, onSendMediaMessage
           />
         </div>
         {text.trim() ? (
-          <button type="submit" disabled={disabled || uploading} className="chat-composer-send">
-            <Send size={17} />
-            Send
+          <button type="submit" disabled={disabled || uploading} className="chat-composer-send" aria-label="Send">
+            <Send size={17} aria-hidden="true" />
           </button>
         ) : (
           <button
